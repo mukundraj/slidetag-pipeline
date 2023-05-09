@@ -1,0 +1,8 @@
+
+rule test:
+	params: 
+		p=1
+	output:
+		"b"
+	shell:
+		"echo {params.p} {output} > b"
