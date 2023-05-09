@@ -6,4 +6,5 @@
 
 ### Part 1: Rigid alignment
 
+
 ### Part 2: Nonlinear alignment
