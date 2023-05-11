@@ -7,6 +7,9 @@
 - Start instance
 - copy nissls to instance
 - copy slide tab images to instance
+```conde activate snakemake```
+```snakemake --cores 1 rulename```
+
 - run prep script
 
 ### Part 2: Rigid alignment

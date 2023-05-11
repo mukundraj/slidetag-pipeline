@@ -1,9 +1,9 @@
+configfile: "../../configs/config.yaml"
 
 rule test:
 	params: 
 		p=1
 	output:
 		"b"
-    configfile: "../../configs/config.yaml"
 	shell:
-		"echo {params.p} {output} {config['datapath']}> b"
+		"echo {params.p} {output} "+config['datapath']+" > b"
