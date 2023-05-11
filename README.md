@@ -2,9 +2,19 @@
 
 ### Sample data to test pipeline
 
-### Prerequisites
+### Part 1: Preparation
 
-### Part 1: Rigid alignment
+- Start instance
+- copy nissls to instance
+- copy slide tab images to instance
+- run prep script
 
+### Part 2: Rigid alignment
 
-### Part 2: Nonlinear alignment
+- perform alignment in slicer
+- run script 2
+
+### Part 3: Nonlinear alignment
+
+- perform alignment in slicer
+- run script 3
