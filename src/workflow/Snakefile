@@ -7,3 +7,15 @@ rule test:
 		"b"
 	shell:
 		"echo {params.p} {output} "+config['datapath']+" > b"
+
+rule injest_imgs:
+	input: 
+		nissls=config['homedir']+config['datapath']+'/nissls'+'.zip',
+		stags=config['homedir']+config['datapath']+'/stags'+'.zip'
+	output:
+		nissls_op=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls'),
+		stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/stags')
+	shell:
+		"unzip {input.nissls} -d {output.nissls_op} ; unzip {input.stags} -d {output.stags_op}"
+	
+	

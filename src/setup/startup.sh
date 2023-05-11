@@ -103,6 +103,9 @@ cd build
 cmake ..
 cd ..
 
+# install unzip
+sudo apt install unzip
+
 
 # set up user password
 # sudo passwd $(whoami)

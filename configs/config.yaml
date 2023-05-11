@@ -1,2 +1,6 @@
 ---
-datapath: 'abc'
+homedir: '/home/mraj'
+datapath: ''
+dataname: 'a5'
+oproot: '/data'
+
