@@ -1,4 +1,6 @@
+import os
 configfile: "../../configs/config.yaml"
+
 
 rule test:
 	params: 
@@ -17,5 +19,34 @@ rule injest_imgs:
 		stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/stags')
 	shell:
 		"unzip {input.nissls} -d {output.nissls_op} ; unzip {input.stags} -d {output.stags_op}"
-	
-	
+
+fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname,[^/]+}.tif')
+print (fnames)
+
+rule all:
+	input: 
+		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}', fname=fnames),
+
+# rule to list dir and create a rigid/folder for each file
+rule create_rigid_folders:
+	input:
+		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif'
+	output:
+		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}'),
+	shell: 
+		"mkdir -p {output.nissls}"
+		
+
+rule get_tifs:
+	input:
+		nissls=rules.injest_imgs.output.nissls_op,
+		stags=rules.injest_imgs.output.stags_op
+	output:
+		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls_onlytifs'),
+		stags=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/stags_onlytifs'),
+	shell:
+		'mkdir -p {output.nissls} && cp {input.nissls}/*.tif {output.nissls} &&'
+		'mkdir -p {output.stags} && cp {input.stags}/*.tif {output.stags}'
+
+# rule to create slicer files via python script
+
