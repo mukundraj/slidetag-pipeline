@@ -18,7 +18,7 @@
 
 ```
   conda activate snakemake
-  bash prep.sh <DATASET_NAME> ./configs/config.yaml
+  bash prep.sh <DATASET_NAME> ./templates/config.yaml
 ```
 
 ### Part 2: Rigid alignment
