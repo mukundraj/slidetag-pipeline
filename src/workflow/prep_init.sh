@@ -9,7 +9,7 @@ if [ "$#" -le 1 ]; then
 fi
 
 # prep the config file - populate username and dataset name
-python ./src/workflow/prep.py $1 $2 $(whoami)
+python ./src/workflow/prep_init.py $1 $2 $(whoami)
 
 
 # cp snakefile

@@ -18,7 +18,7 @@
 
 ```
   conda activate snakemake
-  bash prep.sh <DATASET_NAME> ./templates/config.yaml
+  bash src/workflow/prep_init.sh <DATASET_NAME> templates/config.yaml
 ```
 
 ### Part 2: Rigid alignment
@@ -26,9 +26,15 @@
 - perform alignment in slicer
 - run command 2:
 
+```
+bash src/workflow/prep_rigid.sh
+```
+
 ### Part 3: Nonlinear alignment
 
 - perform alignment in slicer
 - run command 3
 
-  `snakemake --cores 1 rulename`
+```
+bash src/workflow/render_plots.sh
+```
