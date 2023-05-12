@@ -1,7 +1,18 @@
+import sys
+import yaml
 
+print (sys.argv[0], len(sys.argv))
 
-# unzip nissls and stags data to data path/data name/
+dataname = sys.argv[1]
+config_file_path = sys.argv[2]
+uname = sys.argv[3]
 
-# make list of files in write tol s01_files.txt
+with open(config_file_path, 'r') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+    config['homedir'] = config['homedir'].replace('username', uname)
+    config['dataname'] = dataname
 
-# for each pair of files create folder in s02_slicer_rigid with slicer mrmd files
+# dump yaml
+with open('./build/config.yaml', 'w') as f:
+    yaml.dump(config, f)
+

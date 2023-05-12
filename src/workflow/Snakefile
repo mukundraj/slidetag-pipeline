@@ -1,5 +1,7 @@
 import os
-configfile: "../../configs/config.yaml"
+# configfile: "../../configs/config.yaml"
+# configfile: "../../configs/config_test.yaml"
+configfile: "./build/config.yaml"
 
 
 rule test:
@@ -22,6 +24,7 @@ rule injest_imgs:
 
 fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname,[^/]+}.tif')
 print (fnames)
+print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
 rule all:
 	input: 

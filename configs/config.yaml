@@ -1,6 +1,6 @@
 ---
-homedir: '/home/mraj'
+homedir: '/home/username'
 datapath: ''
-dataname: 'a5'
+dataname: 'dataname'
 oproot: '/data'
 
