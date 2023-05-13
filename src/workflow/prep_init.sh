@@ -13,7 +13,10 @@ python ./src/workflow/prep_init.py $1 $2 $(whoami)
 
 
 # cp snakefile
-cp ./src/workflow/Snakefile ./build/Snakefile
+# cp ./src/workflow/Snakefile ./build/Snakefile
+
+# the relative path of the source file must be specified relative to the link file directory, not to the current directory
+ln -s ../src/workflow/Snakefile build/Snakefile
 
 # run the snakemake initial rule for unzipping images
 # snakemake --cores 1 injest_imgs
