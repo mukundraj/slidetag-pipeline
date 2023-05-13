@@ -17,18 +17,23 @@ rule injest_imgs:
 		nissls=config['homedir']+config['datapath']+'/nissls'+'.zip',
 		stags=config['homedir']+config['datapath']+'/stags'+'.zip'
 	output:
-		nissls_op=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls'),
-		stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/stags')
+		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']),
+		# stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname'])
 	shell:
-		"unzip {input.nissls} -d {output.nissls_op} ; unzip {input.stags} -d {output.stags_op}"
+		"unzip {input.nissls} -d {output.dataset_dir} ; unzip {input.stags} -d {output.dataset_dir}"
 
 fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname,[^/]+}.tif')
+
 print (fnames)
 print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
+# rule all:
+# 	input: 
+# 		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}', fname=fnames),
 rule all:
-	input: 
-		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}', fname=fnames),
+	input:
+		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif', fname=fnames),
+		stags=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif', fname=fnames),
 
 # rule to list dir and create a rigid/folder for each file
 rule create_rigid_folders:
@@ -36,20 +41,20 @@ rule create_rigid_folders:
 		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif'
 	output:
 		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}'),
-	shell: 
+	shell:
 		"mkdir -p {output.nissls}"
-		
 
+# rule to copy tifs
 rule get_tifs:
 	input:
-		nissls=rules.injest_imgs.output.nissls_op,
-		stags=rules.injest_imgs.output.stags_op
+		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif',
+		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/stags/{fname}.tif',
 	output:
-		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls_onlytifs'),
-		stags=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/stags_onlytifs'),
+		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
+		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
 	shell:
-		'mkdir -p {output.nissls} && cp {input.nissls}/*.tif {output.nissls} &&'
-		'mkdir -p {output.stags} && cp {input.stags}/*.tif {output.stags}'
+		'cp {input.nissls} {output.nissls} && cp {input.stags} {output.stags}'
+		# 'mkdir -p {output.stags} && cp {input.stags}/*.tif {output.stags}'
 
 # rule to create slicer files via python script
 
