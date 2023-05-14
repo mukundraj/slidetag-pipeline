@@ -31,7 +31,7 @@ rule format_imgs:
 	script:
 		"../src/workflow/format_imgs.py" # relative to Snakefile (Snakefile link in this case)
 
-fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname,[^/]+}.tif')
+fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/raw/nissls/{fname,[^/]+}.tif')
 
 print (fnames)
 print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
@@ -45,19 +45,19 @@ rule all:
 		stags=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif', fname=fnames),
 
 # rule to list dir and create a rigid/folder for each file
-rule create_rigid_folders:
-	input:
-		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif'
-	output:
-		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}'),
-	shell:
-		"mkdir -p {output.nissls}"
+# rule create_rigid_folders:
+# 	input:
+# 		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif'
+# 	output:
+# 		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}'),
+# 	shell:
+# 		"mkdir -p {output.nissls}"
 
 # rule to copy tifs
 rule get_tifs:
 	input:
-		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif',
-		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/stags/{fname}.tif',
+		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/formatted/nissls/{fname}.tif',
+		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/formatted/stags/{fname}.tif',
 	output:
 		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
 		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
