@@ -5,7 +5,7 @@ configfile: "./build/config.yaml"
 
 
 rule test:
-	params: 
+	params:
 		p=1
 	output:
 		"b"
@@ -13,14 +13,23 @@ rule test:
 		"echo {params.p} {output} "+config['datapath']+" > b"
 
 rule injest_imgs:
-	input: 
+	input:
 		nissls=config['homedir']+config['datapath']+'/nissls'+'.zip',
 		stags=config['homedir']+config['datapath']+'/stags'+'.zip'
 	output:
-		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']),
+		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/raw'),
 		# stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname'])
 	shell:
 		"unzip {input.nissls} -d {output.dataset_dir} ; unzip {input.stags} -d {output.dataset_dir}"
+
+# rule format_imgs using python script after reading from raw ims directory
+rule format_imgs:
+	input:
+		dataset_dir=rules.injest_imgs.output.dataset_dir
+	output:
+		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/formatted')
+	script:
+		"../src/workflow/format_imgs.py" # relative to Snakefile (Snakefile link in this case)
 
 fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname,[^/]+}.tif')
 
@@ -54,7 +63,23 @@ rule get_tifs:
 		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
 	shell:
 		'cp {input.nissls} {output.nissls} && cp {input.stags} {output.stags}'
-		# 'mkdir -p {output.stags} && cp {input.stags}/*.tif {output.stags}'
 
-# rule to create slicer files via python script
+# rule to copy and materialize slicer templates via python script
+rule prep_rigid:
+	input:
+
+	output:
+
+	script:
+		"src/workflow/prep_rigid.py"
+
+# create warps folders - check if step really needed?
+
+# rule to get crop of nissl subregion and copy to warps folder
+
+# read bead pos and transform to csv format
+
+# transform coords based on T1 and T2
+
+# plot tfmed points on nissl
 

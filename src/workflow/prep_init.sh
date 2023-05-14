@@ -17,10 +17,11 @@ python ./src/workflow/prep_init.py $1 $2 $(whoami)
 
 # the relative path of the source file must be specified relative to the link file directory, not to the current directory
 ln -s ../src/workflow/Snakefile build/Snakefile
+# ln -s ../src/workflow/format_imgs.py build/format_imgs.py
 
 # run the snakemake initial rule for unzipping images
 # snakemake --cores 1 injest_imgs
 
 echo 'inbash' $1 $2 
 
-snakemake --cores 1 --snakefile build/Snakefile injest_imgs
+snakemake --cores 1 --snakefile build/Snakefile format_imgs
