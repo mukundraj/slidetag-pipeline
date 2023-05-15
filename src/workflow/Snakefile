@@ -38,10 +38,12 @@ print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
 rule all:
 	input:
-		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml', fname=fnames),
-		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.mrk.json', fname=fnames),
-		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.mrk.json', fname=fnames),
-		tfm1=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt', fname=fnames)
+		nissl=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
+		stag=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
+		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
+		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json', fname=fnames),
+		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json', fname=fnames),
+		# tfm2=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/Tfm2.txt', fname=fnames),
 
 # rule to copy tifs
 rule get_tifs:
@@ -71,8 +73,24 @@ rule prep_rigid:
 
 
 # rule to get crop of nissl subregion and copy to warps folder
+rule prep_warp:
+	input:
+		tfm1=rules.prep_rigid.output.tfm1,
+		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
+		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
 
-# read bead pos and transform to csv format
+	output:
+		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif',
+		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif',
+		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json',
+		# tfm2=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/Tfm2.txt',
+
+	script:
+		"../src/workflow/prep_warp.py"
+
+# read warped bead pos and transform to csv format
 
 # transform coords based on T1 and T2
 
