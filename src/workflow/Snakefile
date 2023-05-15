@@ -36,26 +36,12 @@ fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname
 print (fnames)
 print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
-# rule all:
-# 	input: 
-# 		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}', fname=fnames),
 rule all:
 	input:
-		# nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif', fname=fnames),
-		# stags=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif', fname=fnames),
 		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml', fname=fnames),
-		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.json', fname=fnames),
-		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.json', fname=fnames),
+		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.mrk.json', fname=fnames),
+		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.mrk.json', fname=fnames),
 		tfm1=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt', fname=fnames)
-
-# rule to list dir and create a rigid/folder for each file
-# rule create_rigid_folders:
-# 	input:
-# 		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls/{fname}.tif'
-# 	output:
-# 		nissls=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}'),
-# 	shell:
-# 		"mkdir -p {output.nissls}"
 
 # rule to copy tifs
 rule get_tifs:
@@ -73,10 +59,11 @@ rule prep_rigid:
 	input:
 		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
 		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
+		template='templates/rigid.mrml'
 	output:
 		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml',
-		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.json',
-		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.json',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.mrk.json',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.mrk.json',
 		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt',
 
 	script:

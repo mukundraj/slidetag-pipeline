@@ -1,13 +1,20 @@
 
-# with open("Stud.txt", "rt") as fin:
-#     with open("out.txt", "wt") as fout:
-#         for line in fin:
-#             fout.write(line.replace('A', 'Orange'))
 import os
-print ('inpy', {snakemake.output[0]})
+print ('inpy', {snakemake.output.mrml})
 
 
-os.system(f'touch {snakemake.output[0]}')
-os.system(f'touch {snakemake.output[1]}')
-os.system(f'touch {snakemake.output[2]}')
-os.system(f'touch {snakemake.output[3]}')
+with open("./templates/rigid.mrml", "rt") as fin:
+    with open(f'{snakemake.output.mrml}', "wt") as fout:
+        for line in fin:
+            line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')
+            line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
+            fout.write(line)
+
+# os.system(f'touch {snakemake.output[0]}')
+# os.system(f'touch {snakemake.output[1]}')
+# os.system(f'touch {snakemake.output[2]}')
+# os.system(f'touch {snakemake.output[3]}')
+
+os.system(f'cp templates/F.mrk.json {snakemake.output.from_fids}')
+os.system(f'cp templates/T.mrk.json {snakemake.output.to_fids}')
+os.system(f'cp templates/Tfm1.txt {snakemake.output.tfm1}')
