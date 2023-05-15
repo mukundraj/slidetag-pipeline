@@ -41,8 +41,12 @@ print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 # 		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}', fname=fnames),
 rule all:
 	input:
-		nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif', fname=fnames),
-		stags=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif', fname=fnames),
+		# nissls=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif', fname=fnames),
+		# stags=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif', fname=fnames),
+		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml', fname=fnames),
+		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.json', fname=fnames),
+		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.json', fname=fnames),
+		tfm1=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt', fname=fnames)
 
 # rule to list dir and create a rigid/folder for each file
 # rule create_rigid_folders:
@@ -67,13 +71,17 @@ rule get_tifs:
 # rule to copy and materialize slicer templates via python script
 rule prep_rigid:
 	input:
-
+		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
+		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
 	output:
+		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.json',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.json',
+		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt',
 
 	script:
-		"src/workflow/prep_rigid.py"
+		"../src/workflow/prep_rigid.py"
 
-# create warps folders - check if step really needed?
 
 # rule to get crop of nissl subregion and copy to warps folder
 
