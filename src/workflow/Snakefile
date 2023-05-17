@@ -87,6 +87,9 @@ rule prep_warp:
 		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json',
 		# tfm2=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/Tfm2.txt',
 
+	conda:
+		"../envs/stags.yml"
+
 	script:
 		"../src/workflow/prep_warp.py"
 
