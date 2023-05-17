@@ -1,15 +1,18 @@
-"""
-Temporary scratch file for testing functions before adding to main pipeline
+#! /usr/bin/env python
 
-Created by Mukund on 2023-05-15
-"""
-import os
-import numpy as np
+# https://simpleitk.org/SPIE2019_COURSE/01_spatial_transformations.html
+# http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/Python_html/21_Transforms_and_Resampling.html
+# https://medium.com/hipster-color-science/computing-2d-affine-transformations-using-only-matrix-multiplication-2ccb31b52181
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.affine_transform.html#scipy.ndimage.affine_transform
+# https://stackoverflow.com/questions/39712767/how-to-set-size-for-scatter-plot
+
 import SimpleITK as sitk
-import matplotlib.pyplot as plt
+import numpy as np
+from skimage.io import imread
+from scipy import ndimage as ndi
+from skimage.color import rgb2gray
 from PIL import Image
-
-# from produtils import dprint
+import matplotlib.pyplot as plt
 
 # reads ITK transform file and return extracted affine matrix
 def read_tfm(tfm_path):
@@ -36,6 +39,7 @@ def read_tfm(tfm_path):
     A[:2,:2] = M
     A[:2,2] = T[:,0]
     return A
+
 
 # transforms stag cell points, compute bbox and plot cropped image
 def tfm_nissl(tfm_path, nissl_path, pts, op_path):
@@ -104,34 +108,22 @@ def tfm_stag(tfm_path, pts, op_path):
     im = Image.open(op_path)
     im.convert('RGB').save(op_path, 'TIFF',dpi=(72,72))
 
+
+
+tfm_file ="/Users/mraj/Desktop/test/data/a5/rigid/nis_014_sl/Tfm1.txt"
+# tfmed_pt = tfm.TransformPoint([0,0,0])
+# print('A\n', A)
+
 # create test 2D points in homogeneous coordinates
 topr = 1050
 test_pts = np.array([[0,0,1],[topr,0,1],[0,topr,1],[topr,topr,1]], dtype=np.float64).T
 print('testpts\n', test_pts)
 
-print('tfm1', f'{snakemake.input.tfm1}')
-# copy stag image after applying tfms and lift bbox
-# os.system(f'touch {snakemake.output.nissl}')
-# os.system(f'cp {snakemake.input.nissl} {snakemake.output.nissl}')
-tfm_nissl(snakemake.input.tfm1, snakemake.input.nissl, test_pts, snakemake.output.nissl)
+nis_file = "/Users/mraj/Desktop/test/data/a5/rigid/nis_014_sl/nis_014_sl.tif"
+op_path = "/Users/mraj/Desktop/test/data/a5/rigid/nis_014_sl/nis_014_sl_crop.tif"
+stag_file = ""
+tfm_nissl(tfm_file, nis_file, test_pts, op_path)
 
-# copy nissl image after cropping bbox after transform stag coords
-# os.system(f'touch {snakemake.output.stag}')
-# os.system(f'cp {snakemake.input.stag} {snakemake.output.stag}')
-tfm_stag(snakemake.input.tfm1, test_pts, snakemake.output.stag)
+op_path = "/Users/mraj/Desktop/test/data/a5/rigid/nis_014_sl/nis_014_sl_stag.tif"
+tfm_stag(tfm_file, test_pts, op_path)
 
-# os.system(f'touch {snakemake.output.mrml}')
-# os.system(f'touch {snakemake.output.from_fids}')
-# os.system(f'touch {snakemake.output.to_fids}')
-
-# copy template files
-with open("./templates/warp/warp.mrml", "rt") as fin:
-    with open(f'{snakemake.output.mrml}', "wt") as fout:
-        for line in fin:
-            line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')
-            line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
-            fout.write(line)
-
-os.system(f'cp templates/warp/F.mrk.json {snakemake.output.from_fids}')
-os.system(f'cp templates/warp/T.mrk.json {snakemake.output.to_fids}')
-# os.system(f'touch {snakemake.output.tfm2}') # don't add this to output, empty file takes slicer to undesired state
