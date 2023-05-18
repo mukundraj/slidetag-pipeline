@@ -12,7 +12,7 @@ from PIL import Image
 # from produtils import dprint
 
 # reads ITK transform file and return extracted affine matrix
-def read_tfm(tfm_path):
+def tfm_pts(tfm_path, pts):
     tfm = sitk.ReadTransform(tfm_path)
     print(tfm)
     M = str(tfm).split('\n')[10:13]
@@ -35,16 +35,18 @@ def read_tfm(tfm_path):
     A = np.zeros((3,3))
     A[:2,:2] = M
     A[:2,2] = T[:,0]
-    return A
+    A[2,2] = 1
+
+    pts_tfmed = np.matmul(A, pts)
+    return A, pts_tfmed
 
 # transforms stag cell points, compute bbox and plot cropped image
-def tfm_nissl(tfm_path, nissl_path, pts, op_path):
-    A = read_tfm(tfm_path)
+def tfm_nissl(pts_tfmed, nissl_path, op_path):
     # nissl_img = imread(nissl_path)
     # img = rgb2gray(imread(nissl_path))
     # A[0,2] = 1000
     # A[1,2] = 1000
-    pts_tfmed = np.matmul(A, pts)
+    # A, pts_tfmed = tfm_pts(tfm_path, pts)
 
     # get bounding box of pts_tfmed
     bbox = np.zeros((2,2))
@@ -67,9 +69,9 @@ def tfm_nissl(tfm_path, nissl_path, pts, op_path):
     cropped_img.save(op_path, 'TIFF',dpi=(72,72))
 
 # transforms cell positions and plots an image bounded by bbox of transformed cell positions
-def tfm_stag(tfm_path, pts, op_path):
-    A = read_tfm(tfm_path)
-    pts_tfmed = np.matmul(A, pts)
+def tfm_stag(pts_tfmed, op_path):
+    # A, pts_tfmed = tfm_pts(tfm_path, pts)
+    # pts_tfmed = np.matmul(A, pts)
     # get bounding box of pts_tfmed
     bbox = np.zeros((2,2))
     bbox[0,0] = np.min(pts_tfmed[0,:])
@@ -113,12 +115,16 @@ print('tfm1', f'{snakemake.input.tfm1}')
 # copy stag image after applying tfms and lift bbox
 # os.system(f'touch {snakemake.output.nissl}')
 # os.system(f'cp {snakemake.input.nissl} {snakemake.output.nissl}')
-tfm_nissl(snakemake.input.tfm1, snakemake.input.nissl, test_pts, snakemake.output.nissl)
+
+A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
+print('pts_tfmed\n', pts_tfmed)
+np.savetxt(snakemake.output.tfm1ed_pts, pts_tfmed[:2].T, delimiter=",")
+tfm_nissl(pts_tfmed, snakemake.input.nissl, snakemake.output.nissl)
 
 # copy nissl image after cropping bbox after transform stag coords
 # os.system(f'touch {snakemake.output.stag}')
 # os.system(f'cp {snakemake.input.stag} {snakemake.output.stag}')
-tfm_stag(snakemake.input.tfm1, test_pts, snakemake.output.stag)
+tfm_stag(pts_tfmed, snakemake.output.stag)
 
 # os.system(f'touch {snakemake.output.mrml}')
 # os.system(f'touch {snakemake.output.from_fids}')
@@ -132,6 +138,6 @@ with open("./templates/warp/warp.mrml", "rt") as fin:
             line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
             fout.write(line)
 
-os.system(f'cp templates/warp/F.mrk.json {snakemake.output.from_fids}')
-os.system(f'cp templates/warp/T.mrk.json {snakemake.output.to_fids}')
+os.system(f'cp templates/warp/F.fcsv {snakemake.output.from_fids}')
+os.system(f'cp templates/warp/T.fcsv {snakemake.output.to_fids}')
 # os.system(f'touch {snakemake.output.tfm2}') # don't add this to output, empty file takes slicer to undesired state

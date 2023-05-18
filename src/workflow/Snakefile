@@ -38,12 +38,12 @@ print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
 rule all:
 	input:
-		nissl=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
-		stag=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
-		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
-		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json', fname=fnames),
-		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json', fname=fnames),
-		# tfm2=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/Tfm2.txt', fname=fnames),
+		# nissl=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
+		# stag=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
+		# mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
+		# from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json', fname=fnames),
+		# to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json', fname=fnames),
+		olayplot=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',fname=fnames)
 
 # rule to copy tifs
 rule get_tifs:
@@ -83,9 +83,9 @@ rule prep_warp:
 		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif',
 		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif',
 		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml',
-		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json',
-		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json',
-		# tfm2=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/Tfm2.txt',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.fcsv',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.fcsv',
+		tfm1ed_pts=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/tfm1ed_pts.txt',
 
 	conda:
 		"../envs/stags.yml"
@@ -93,9 +93,19 @@ rule prep_warp:
 	script:
 		"../src/workflow/prep_warp.py"
 
-# read warped bead pos and transform to csv format
+# rule to create overlay plot from registered stag coords
+rule render_plots:
+	input:
+		nissl=rules.prep_warp.output.nissl,
+		from_fids=rules.prep_warp.output.from_fids, # only to indicate prep_warp ran
+		to_fids=rules.prep_warp.output.to_fids, # only to indicate prep_warp ran
+		tfm1ed_pts=rules.prep_warp.output.tfm1ed_pts,
+		template='templates/warp/warp.mrml'
+	output:
+		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',
 
-# transform coords based on T1 and T2
-
-# plot tfmed points on nissl
+	conda:
+		"../envs/stags.yml"
+	script:
+		"../src/workflow/render_plots.py"
 
