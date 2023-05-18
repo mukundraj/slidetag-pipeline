@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.22)
+
+project(coordinate_mapper)
+
+# Find Cairo
+# set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+# find_package(Cairo REQUIRED)
+
+find_package(ITK REQUIRED)
+
+include(${ITK_USE_FILE})
+
+include_directories(./src/cpp)
+
+add_executable(cmapper2 ./src/cpp/mapper2.cpp)
+
+target_link_libraries(cmapper2 ${ITK_LIBRARIES})
+
+
+# target_include_directories(drawer PRIVATE ${Cairo_INCLUDE_DIRS})
+# target_link_libraries(drawer ${ITK_LIBRARIES} ${Cairo_LIBS})
