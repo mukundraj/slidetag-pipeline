@@ -100,14 +100,15 @@ plt.scatter(pos_warped_coords[0,:], pos_warped_coords[1,:], s=500, c='#000000')
 plt.xlim(bbox[0,0], bbox[0,1])
 plt.ylim(bbox[1,0], bbox[1,1])
 
-plt.savefig(f'{op_folder}/tfmed_plt_plot.png', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
-
-
+tfmed_plot = f'{op_folder}/tfmed_plt_plot.png'
+plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
 
 
 # create overlay image on nissl
 
-os.system(f'touch {snakemake.output.olayplot}')
-
+# os.system(f'touch {snakemake.output.olayplot}')
+# https://stackoverflow.com/questions/67577459/imagemagick-composite-two-images-and-fill-transparent-data-with-original-data
+cmd = f'magick {snakemake.input.nissl} {tfmed_plot} -compose over -composite {snakemake.output.olayplot}'
+os.system(cmd)
 
 
