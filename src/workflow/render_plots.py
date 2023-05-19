@@ -112,7 +112,7 @@ plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True
 
 # os.system(f'touch {snakemake.output.olayplot}')
 # https://stackoverflow.com/questions/67577459/imagemagick-composite-two-images-and-fill-transparent-data-with-original-data
-cmd = f'magick {snakemake.input.nissl} {tfmed_plot} -compose over -composite {snakemake.output.olayplot}'
+cmd = f'convert {snakemake.input.nissl} {tfmed_plot} -compose over -composite {snakemake.output.olayplot}'
 os.system(cmd)
 
 
