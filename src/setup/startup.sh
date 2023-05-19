@@ -107,6 +107,8 @@ cd ..
 # install unzip
 sudo apt install unzip
 
+# install ImageMagick
+sudo apt -y install imagemagick
 
 # set up user password
 # sudo passwd $(whoami)

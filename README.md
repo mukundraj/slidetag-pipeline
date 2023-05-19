@@ -14,7 +14,16 @@
 ### Part 1: Initialization (run once for each dataset)
 
 - copy nissls to instance
+
+```
+  gcloud compute scp nissls.zip <INSTANCE_NAME>:~/
+```
+
 - copy slide tab images to instance
+
+```
+  gcloud compute scp stags.zip <INSTANCE_NAME>:~/
+```
 
 ```
   conda activate snakemake
