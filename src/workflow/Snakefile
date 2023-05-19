@@ -38,12 +38,15 @@ print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
 
 rule all:
 	input:
-		# nissl=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
-		# stag=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
-		# mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
-		# from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.mrk.json', fname=fnames),
-		# to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.mrk.json', fname=fnames),
 		olayplot=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',fname=fnames)
+
+rule prep_rigid_driver:
+	input:
+		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml', fname=fnames),
+		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.mrk.json', fname=fnames),
+		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.mrk.json', fname=fnames),
+		tfm1=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt', fname=fnames)
+
 
 # rule to copy tifs
 rule get_tifs:
