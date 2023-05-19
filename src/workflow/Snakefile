@@ -78,6 +78,7 @@ rule prep_warp:
 		tfm1=rules.prep_rigid.output.tfm1,
 		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
 		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
+		data=config['homedir']+config['oproot']+'/'+config['dataname']+'/raw/stags/{fname}.csv',
 
 	output:
 		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif',

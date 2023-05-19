@@ -107,9 +107,21 @@ def tfm_stag(pts_tfmed, op_path):
     im.convert('RGB').save(op_path, 'TIFF',dpi=(72,72))
 
 # create test 2D points in homogeneous coordinates
-topr = 1050
-test_pts = np.array([[0,0,1],[topr,0,1],[0,topr,1],[topr,topr,1]], dtype=np.float64).T
-print('testpts\n', test_pts)
+
+# read csv using numpy
+pts = np.genfromtxt(f'{snakemake.input.data}', delimiter=',', names=True, dtype=np.float64).T
+print(pts['x'])
+
+# joint pts[x] and pts[y] into a single array
+test_pts = np.array([pts['x'], pts['y'], np.ones(len(pts['x']))], dtype=np.float64)
+print('pts\n', pts)
+
+
+
+
+# topr = 1050
+# test_pts = np.array([[0,0,1],[topr,0,1],[0,topr,1],[topr,topr,1]], dtype=np.float64).T
+# print('testpts\n', test_pts)
 
 print('tfm1', f'{snakemake.input.tfm1}')
 # copy stag image after applying tfms and lift bbox
