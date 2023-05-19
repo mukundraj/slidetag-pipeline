@@ -89,6 +89,10 @@ pos_warped_coords, bbox, bbox_dims = get_tfmed_pts(snakemake.input.tfm1ed_pts, s
 # plot tfmed points - keep bbox same as nissl dimensions
 
 # plot pos_warped_coords with bounding box bbox
+pts = np.genfromtxt(f'{snakemake.input.data}', delimiter=',', names=True, dtype=np.float64).T
+v1 = (pts['v1'])
+print('v1', v1.shape)
+
 op_folder = os.path.split(snakemake.input.tfm1ed_pts)[0]
 my_dpi = 72
 fig = plt.figure(figsize=(bbox_dims[0]/my_dpi, bbox_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
@@ -96,7 +100,7 @@ ax = plt.Axes(fig, [0., 0., 1, 1])
 ax.set_axis_off()
 fig.add_axes(ax)
 print('pos_warped_coords', pos_warped_coords)
-plt.scatter(pos_warped_coords[0,:], pos_warped_coords[1,:], s=500, c='#000000')
+plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
 plt.xlim(bbox[0,0], bbox[0,1])
 plt.ylim(bbox[1,0], bbox[1,1])
 

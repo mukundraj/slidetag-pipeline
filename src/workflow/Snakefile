@@ -101,7 +101,8 @@ rule render_plots:
 		from_fids=rules.prep_warp.output.from_fids, # only to indicate prep_warp ran
 		to_fids=rules.prep_warp.output.to_fids, # only to indicate prep_warp ran
 		tfm1ed_pts=rules.prep_warp.output.tfm1ed_pts,
-		template='templates/warp/warp.mrml'
+		template='templates/warp/warp.mrml',
+		data=rules.prep_warp.input.data,
 	output:
 		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',
 
