@@ -22,6 +22,12 @@ ln -s ../src/workflow/Snakefile build/Snakefile
 # run the snakemake initial rule for unzipping images
 # snakemake --cores 1 injest_imgs
 
+# build warping code in c++
+cd build
+cmake -DITK_DIR=/usr/src/InsightToolkit-5.3.0/build ..
+make 
+cd ..
+
 echo 'inbash' $1 $2 
 
 snakemake --cores 1 --snakefile build/Snakefile format_imgs
