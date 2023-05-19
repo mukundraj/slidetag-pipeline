@@ -54,6 +54,7 @@ sudo make install
 
 
 #install/build itk
+# use location /usr/src/InsightToolkit-5.3.0/build
 
 wget https://github.com/InsightSoftwareConsortium/ITK/releases/download/v5.3.0/InsightToolkit-5.3.0.tar.gz
 tar -xvzf InsightToolkit-5.3.0.tar.gz
