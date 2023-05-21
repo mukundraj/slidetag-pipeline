@@ -1,4 +1,3 @@
 #!/bin/bash
 
-# just for testing
-snakemake --cores 1 --snakefile build/Snakefile prep_warp
+snakemake --use-conda --cores 1 --snakefile build/Snakefile prep_warp_driver

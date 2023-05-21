@@ -1,49 +1,62 @@
+## Sample data to try pipeline
+
 ## Steps for slide tag image alignment
 
-### Sample data to test pipeline
+### Part 0: Setup chrome remote desktop
 
-### Part 0: Setup (only first time)
-
-- Start instance
-
-```
-  git clone https://github.com/mukundraj/slidetag-pipeline.git
-  cd slidetag-pipeline && mkdir build
-```
-
-### Part 1: Initialization (run once for each dataset)
+### Part 1: Date initialization (run once for each dataset)
 
 - copy nissls to instance
 
 ```
-  gcloud compute scp nissls.zip <INSTANCE_NAME>:~/
+  gcloud compute scp nissls.zip st-alignment:~/
 ```
 
 - copy slide tab images to instance
 
 ```
-  gcloud compute scp stags.zip <INSTANCE_NAME>:~/
+  gcloud compute scp stags.zip st-alignment:~/
 ```
+
+- activate conda environment needed for alignment workflow scripts
 
 ```
   conda activate snakemake
-  bash src/workflow/prep_init.sh <DATASET_NAME> templates/config.yaml
+```
+
+- run following command in terminal to format images
+
+```
+  bash src/workflow/prep_init.sh DATASET_NAME templates/config.yaml
 ```
 
 ### Part 2: Rigid alignment
 
-- perform alignment in slicer
-- run command 2:
+- run following command to prepare slicer files for rigid alignment:
 
 ```
 bash src/workflow/prep_rigid.sh
 ```
 
+- identify 3 pairs of fiducial points in slicer
+
 ### Part 3: Nonlinear alignment
 
-- perform alignment in slicer
-- run command 3
+- run following command to prepare slicer files for nonlinear alignment:
+
+```
+bash src/workflow/prep_warp.sh
+```
+
+- identify as many pairs of fiducials as needed in slicer
+
+### Part 4: Create plots
 
 ```
 bash src/workflow/render_plots.sh
 ```
+
+## Appendix: Instance setup steps (only needed for instance setup, ignore otherwise)
+
+- Create instance
+- Run setup script
