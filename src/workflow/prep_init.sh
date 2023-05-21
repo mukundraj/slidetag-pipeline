@@ -24,7 +24,11 @@ ln -s ../src/workflow/Snakefile build/Snakefile
 
 # build warping code in c++
 cd build
-cmake -DITK_DIR=/usr/src/InsightToolkit-5.3.0/build ..
+if [[ $OSTYPE == "linux-gnu" ]]; then
+    cmake -DITK_DIR=/usr/src/InsightToolkit-5.3.0/build ..
+else
+    cmake -DITK_DIR=/Users/mraj/Desktop/work/pkgsources/ITK/build ..
+fi
 make 
 cd ..
 
