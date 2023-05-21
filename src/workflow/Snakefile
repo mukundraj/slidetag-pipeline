@@ -92,7 +92,7 @@ rule prep_warp:
 		tfm1ed_pts=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/tfm1ed_pts.txt',
 
 	conda:
-		"../envs/stags-ubun.yml"
+		'../envs/'+config['envname']+'.yml'
 
 	script:
 		"../src/workflow/prep_warp.py"
@@ -110,7 +110,7 @@ rule render_plots:
 		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',
 
 	conda:
-		"../envs/stags-ubun.yml"
+		'../envs/'+config['envname']+'.yml'
 	script:
 		"../src/workflow/render_plots.py"
 

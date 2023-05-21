@@ -1,6 +1,7 @@
 ---
 homedir: '/home/username'
 datapath: ''
-dataname: 'dataname'
+dataname: 'placeholder'
 oproot: '/data'
+envname: 'stags-ubun'
 
