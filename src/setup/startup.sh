@@ -112,3 +112,10 @@ sudo apt -y install imagemagick
 
 # set up user password
 # sudo passwd $(whoami)
+
+# Folling line create a new conda env with R and R-essentials, not needed for
+# now since env loaded via r_env.yml env file in slidetag-pipeline repo. Also
+# optional command to remove env.
+
+# conda create -n r_env r-essentials r-base=4.2.0
+# conda remove -n r_env --all
