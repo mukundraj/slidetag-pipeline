@@ -8,7 +8,7 @@ Download [sample data](https://drive.google.com/drive/folders/1Fzp5OZB1giX962Esp
 
 - Follow steps [here](https://support.google.com/chrome/answer/1649523?hl=en&co=GENIE.Platform%3DDesktop) to connect to instance via remote desktop. This step assumes GCP instance is already set up. If not, see appendix to set up GCP instance.
 
-### Part 1: Date initialization (run once for each dataset)
+### Part 1: Data initialization (run once for each dataset)
 
 - copy nissls to instance
 
