@@ -13,6 +13,6 @@ with open(config_file_path, 'r') as f:
     config['dataname'] = dataname
 
 # dump yaml
-with open('./build/config.yaml', 'w') as f:
+with open('../build/config.yaml', 'w') as f:
     yaml.dump(config, f)
 

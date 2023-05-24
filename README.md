@@ -31,7 +31,7 @@ Download [sample data](https://drive.google.com/drive/folders/1Fzp5OZB1giX962Esp
 - run following command in terminal to format images
 
 ```
-  bash src/workflow/prep_init.sh DATASET_NAME templates/config.yaml
+  bash src/workflow/prep_init.sh DATASET_NAME
 ```
 
 ### Part 2: Rigid alignment
@@ -74,14 +74,4 @@ bash src/setup_instance.sh
 
 ```
 bash src/startup.sh
-```
-
-### A2: Use following command arguments for local testing of pipeline on osx
-
-- note that different config template file is passed as argument than in case of linux instance
-
-**Part 1: Data initialization command\_**
-
-```
-  bash src/workflow/prep_init.sh DATASET_NAME templates/config_osx.yaml
 ```
