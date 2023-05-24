@@ -12,6 +12,16 @@ rule test:
 	shell:
 		"echo {params.p} {output} "+config['datapath']+" > b"
 
+rule test_r:
+	input:
+		"b"
+	output:
+		"r_env"
+	conda:
+		"../envs/r_env.yml"
+	shell:
+		"src/R/test.R"
+
 rule injest_imgs:
 	input:
 		nissls=config['homedir']+config['datapath']+'/nissls'+'.zip',
