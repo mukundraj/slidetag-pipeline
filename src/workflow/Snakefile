@@ -13,14 +13,14 @@ rule test:
 		"echo {params.p} {output} "+config['datapath']+" > b"
 
 rule test_r:
-	input:
-		"b"
+	params:
+		p=1
 	output:
-		"r_env"
+		opimg=config['homedir']+config['oproot']+'/tmp.png'
 	conda:
 		"../envs/r_env.yml"
-	shell:
-		"src/R/test.R"
+	script:
+		"../src/R/test.R"
 
 rule injest_imgs:
 	input:
