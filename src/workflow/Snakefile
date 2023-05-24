@@ -18,7 +18,7 @@ rule test_r:
 	output:
 		opimg=config['homedir']+config['oproot']+'/tmp.png'
 	conda:
-		"../envs/r_env.yml"
+		'../envs/'+config['r_envname']+'.yml'
 	script:
 		"../src/R/test.R"
 

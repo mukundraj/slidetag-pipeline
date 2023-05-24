@@ -4,4 +4,5 @@ datapath: ''
 dataname: 'placeholder'
 oproot: '/data'
 envname: 'stags-ubun'
+r_envname: 'r_env_ubun'
 
