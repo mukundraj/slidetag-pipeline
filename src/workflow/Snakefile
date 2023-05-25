@@ -12,6 +12,12 @@ rule test:
 	shell:
 		"echo {params.p} {output} "+config['datapath']+" > b"
 
+rule test2:
+	output:
+		"b"
+	shell:
+		"echo aa {output} "+"hello"+"2>&1 | tee b"
+
 rule test_r:
 	params:
 		p=1

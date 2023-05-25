@@ -61,3 +61,29 @@ ggsave(impath, dpi=75)
 # obj$seurat_clusters
 # plotting by color - http://www.sthda.com/english/wiki/qplot-quick-plot-with-ggplot2-r-software-and-data-visualization
 # filtering clusters https://www.biostars.org/p/483016/
+# > length(obj$seurat_clusters)
+# [1] 12936
+# > dim(obj@reductions$spatial@cell.embeddings)
+# [1] 12936     2
+# b <- table(obj$seurat_clusters)
+# c <- sort(b, decreasing=TRUE)
+# names(c)
+
+# min(c(length(names(c)),10)) # select top 10 or less number of cells to generate imgs
+
+# strtoi(names(c)[1])
+# inds <- obj$seurat_clusters==2
+# d <- obj@reductions$spatial@cell.embeddings
+# z <- na.omit(as.data.frame(d[inds,]))
+
+# # for extents
+# xlims <- c(min(sb.data$x_um), max(sb.data$x_um))
+# ylims <- c(min(sb.data$y_um), max(sb.data$y_um))
+# 
+# 
+# qplot(z$s_1, z$s_2, geom='point', color=I('red'), size=I(1)) + theme_nothing() + 
+#   scale_x_continuous(expand=c(0,0), limits=xlims) +
+#   scale_y_continuous(expand=c(0,0), limits=ylims) +
+#   labs(x = NULL, y = NULL)
+
+
