@@ -29,9 +29,13 @@ fmted_nis_dir = f'{snakemake.output[0]}/nissls'
 
 os.system(f'mkdir -p {fmted_nis_dir}')
 os.chdir(inp_nis_dir)
-for file in glob.glob("*.png"):
+nis_files = glob.glob("*.png")
+
+assert(len(nis_files) == 1)
+
+for file in nis_files:
     ip_file_path = os.path.join(inp_nis_dir, file)
-    op_file_name = file.split('.')[0] + '.tif'
+    op_file_name =  f'{snakemake.config["dataname"]}_nissl.tif'
     op_file_path = os.path.join(fmted_nis_dir, op_file_name)
     os.system(f'convert {ip_file_path} {op_file_path}')
 
