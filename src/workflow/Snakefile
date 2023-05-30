@@ -28,22 +28,44 @@ rule test_r:
 	script:
 		"../src/R/test.R"
 
-rule injest_imgs:
+# unzip user uploaded zip file into dataname/raw folder
+rule unzip_data:
 	input:
-		nissls=config['homedir']+config['datapath']+'/nissls'+'.zip',
-		stags=config['homedir']+config['datapath']+'/stags'+'.zip'
+		inpzip=config['homedir']+config['datapath']+'/'+config['dataname']+'.zip'
 	output:
-		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/raw'),
-		# stags_op=directory(config['homedir']+config['oproot']+'/'+config['dataname'])
+		outdir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/0_raw'),
 	shell:
-		"unzip {input.nissls} -d {output.dataset_dir} ; unzip {input.stags} -d {output.dataset_dir}"
+		"unzip {input.inpzip} -d {output.outdir}"
+
+
+# generate stag imgs and place in raw/stag folder
+rule get_stag_imgs:
+	input:
+		raw_dir=rules.unzip_data.output.outdir
+	output:
+		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/1_interim/stags'),
+	conda:
+		'../envs/'+config['r_envname']+'.yml'
+	script:
+		"../src/R/get_stag_imgs.R"
+
+# copies nissl img from raw folder to raw/nissls folder
+rule get_nissl_imgs:
+	input:
+		raw_dir=rules.unzip_data.output.outdir
+	output:
+		nissl_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/1_interim/nissls'),
+	shell:
+		"mkdir -p {output.nissl_imgs_dir} && cp {input.raw_dir}/"+config['dataname']+"/*.png {output.nissl_imgs_dir}"
+
 
 # rule format_imgs using python script after reading from raw ims directory
 rule format_imgs:
 	input:
-		dataset_dir=rules.injest_imgs.output.dataset_dir
+		stag_imgs_dir=rules.get_stag_imgs.output.stag_imgs_dir,
+		nissl_imgs_dir=rules.get_nissl_imgs.output.nissl_imgs_dir
 	output:
-		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/formatted')
+		dataset_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/2_formatted')
 	script:
 		"../src/workflow/format_imgs.py" # relative to Snakefile (Snakefile link in this case)
 
