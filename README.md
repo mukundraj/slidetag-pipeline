@@ -4,31 +4,25 @@ Download [sample data](https://drive.google.com/drive/folders/1Fzp5OZB1giX962Esp
 
 ## Steps for slide tag image alignment
 
-### Part 0: Setup chrome remote desktop
+### Part 0: Setup
 
-- Follow steps [here](https://support.google.com/chrome/answer/1649523?hl=en&co=GENIE.Platform%3DDesktop) to connect to instance via remote desktop. This step assumes GCP instance is already set up. If not, see appendix to set up GCP instance.
+- **_Connect to remote desktop_** Follow steps [here](https://support.google.com/chrome/answer/1649523?hl=en&co=GENIE.Platform%3DDesktop) to connect to instance via remote desktop. This step assumes GCP instance is already set up. If not, see appendix to set up GCP instance.
 
-### Part 1: Data initialization (run once for each dataset)
-
-- copy nissls to instance
-
-```
-  gcloud compute scp nissls.zip st-alignment:~/
-```
-
-- copy slide tab images to instance
-
-```
-  gcloud compute scp stags.zip st-alignment:~/
-```
-
-- activate conda environment needed for alignment workflow scripts
+- **_Activate snakemake conda environment_** needed for alignment workflow scripts. This command should be run before running any of the scripts in the following parts of pipeline.
 
 ```
   conda activate snakemake
 ```
 
-- run following command in terminal to format images
+### Part 1: Data initialization (run once for each dataset)
+
+- copy dataset to GCP instance as zip file containing 3 items - nissl image, seurat object in qs format, bead coordinates in csv file.
+
+```
+  gcloud compute scp DATASET_NAME.zip st-alignment:~/
+```
+
+- run following command in terminal to extract and prepare data to start alignment process.
 
 ```
   bash src/workflow/prep_init.sh DATASET_NAME
@@ -36,25 +30,17 @@ Download [sample data](https://drive.google.com/drive/folders/1Fzp5OZB1giX962Esp
 
 ### Part 2: Rigid alignment
 
-- run following command to prepare slicer files for rigid alignment:
-
-```
-bash src/workflow/prep_rigid.sh
-```
-
 - identify 3 pairs of fiducial points in slicer
-
-### Part 3: Nonlinear alignment
-
-- run following command to prepare slicer files for nonlinear alignment:
+- run following script to perform rigid alignment and prepare for nonlinear alignment
 
 ```
 bash src/workflow/prep_warp.sh
 ```
 
-- identify as many pairs of fiducials as needed in slicer
+### Part 3: Nonlinear alignment
 
-### Part 4: Create plots
+- identify as many pairs of fiducials as needed in slicer
+- run following script to perform nonlinear alignment and prepare overlay plots
 
 ```
 bash src/workflow/render_plots.sh

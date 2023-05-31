@@ -37,4 +37,4 @@ cd ..
 
 echo 'inbash' $1 $2 
 
-snakemake --cores 1 --snakefile build/Snakefile format_imgs
+snakemake --cores 1 --snakefile build/Snakefile prep_rigid
