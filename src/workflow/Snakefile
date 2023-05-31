@@ -105,14 +105,13 @@ rule get_tifs:
 # rule to copy and materialize slicer templates via python script
 rule prep_rigid:
 	input:
-		nissls=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
-		stags=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
+		rigid_imgs_dir=rules.get_tifs.output.rigid_imgs_dir,
 		template='templates/rigid.mrml'
 	output:
-		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.mrml',
-		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/F.mrk.json',
-		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/T.mrk.json',
-		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/Tfm1.txt',
+		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/{config["dataname"]}.mrml',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/F.mrk.json',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/T.mrk.json',
+		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/Tfm1.txt',
 
 	script:
 		"../src/workflow/prep_rigid.py"

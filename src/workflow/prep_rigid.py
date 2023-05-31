@@ -6,8 +6,10 @@ print ('inpy', {snakemake.output.mrml})
 with open("./templates/rigid.mrml", "rt") as fin:
     with open(f'{snakemake.output.mrml}', "wt") as fout:
         for line in fin:
-            line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')
-            line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
+            # line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')
+            # line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
+            line = line.replace('fname_nis', f'{snakemake.config["dataname"]}')
+            line = line.replace('fname_stag', f'stag_{snakemake.config["dataname"]}')
             fout.write(line)
 
 # os.system(f'touch {snakemake.output[0]}')
