@@ -43,7 +43,7 @@ rule get_stag_imgs:
 	input:
 		raw_dir=rules.unzip_data.output.outdir
 	output:
-		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_imgs/stags'),
+		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/stags'),
 	conda:
 		'../envs/'+config['r_envname']+'.yml'
 	script:
@@ -54,7 +54,7 @@ rule get_nissl_imgs:
 	input:
 		raw_dir=rules.unzip_data.output.outdir
 	output:
-		nissl_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_imgs/nissls'),
+		nissl_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/nissls'),
 	shell:
 		"mkdir -p {output.nissl_imgs_dir} && cp {input.raw_dir}/"+config['dataname']+"/*.png {output.nissl_imgs_dir}"
 
@@ -100,7 +100,7 @@ rule get_tifs:
 	output:
 		rigid_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/03_rigid/tifs'),
 	shell:
-		"mkdir -p {output.rigid_imgs_dir} && cp {input.fmted_imgs_dir}/nissls/*.tif {output.rigid_imgs_dir}/ && cp {input.fmted_imgs_dir}/stags/*.tif {output.rigid_imgs_dir}/"
+		"mkdir -p {output.rigid_imgs_dir}/nissls && mkdir -p {output.rigid_imgs_dir}/stags && cp {input.fmted_imgs_dir}/nissls/*.tif {output.rigid_imgs_dir}/nissls/ && cp {input.fmted_imgs_dir}/stags/*.tif {output.rigid_imgs_dir}/stags/"
 
 # rule to copy and materialize slicer templates via python script
 rule prep_rigid:
