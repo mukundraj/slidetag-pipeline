@@ -38,12 +38,13 @@ rule unzip_data:
 		"unzip {input.inpzip} -d {output.outdir}"
 
 
-# generate stag imgs and place in raw/stag folder
+# Generate stag imgs and place in interim/stag folder. Also saves coords for each celltype in interim/stags_coords folder.
 rule get_stag_imgs:
 	input:
 		raw_dir=rules.unzip_data.output.outdir
 	output:
 		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/stags'),
+		stag_coords_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/stags_coords')
 	conda:
 		'../envs/'+config['r_envname']+'.yml'
 	script:
@@ -121,9 +122,9 @@ rule prep_rigid:
 rule prep_warp:
 	input:
 		tfm1=rules.prep_rigid.output.tfm1,
-		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/{fname}.tif',
-		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/rigid/{fname}/stag_{fname}.tif',
-		data=config['homedir']+config['oproot']+'/'+config['dataname']+'/raw/stags/{fname}.csv',
+		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/tifs/nissls/{config["dataname"]}_nissl.tif',
+		stags_folder=config['homedir']+config['oproot']+'/'+config['dataname']+'/03_rigid/tifs/stags',
+		data=config['homedir']+config['oproot']+'/'+config['dataname']+f'/01_interim/stags_coords',
 
 	output:
 		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif',

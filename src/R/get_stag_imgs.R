@@ -10,13 +10,17 @@ require(cowplot)
 
 inpdir <- snakemake@input[['raw_dir']]
 opdir <- snakemake@output[['stag_imgs_dir']]
+opdir_coords <- snakemake@output[['stag_coords_dir']]
 
 print("Creating output directory:")
 print(opdir)
 dir.create(file.path(opdir), recursive = TRUE)
 
+print("Creating output directory for coords:")
+print(opdir_coords)
+dir.create(file.path(opdir_coords), recursive = TRUE)
 
-# if coords csv file exists in input dir, create plot and save in output dir
+# if coords csv file exists in input dir, create plot and save in output dir, also store coords in interim/stags_coords folder
 data_folder_path <- file.path(inpdir, snakemake@config['dataname'])
 files <- list.files(path=data_folder_path, pattern = "\\.csv$")
 print(files[[1]])
@@ -45,6 +49,9 @@ if (length(files)==1){
   impath <- file.path(opdir, 'bead_plot.png')
   ggsave(impath, dpi=75)
 
+  # save coords in opdir_coords folder in csv file named bead_coords.csv and only x and y columns
+  coords_file <- file.path(opdir_coords, 'bead_coords.csv')
+  write.table(sb.data[,c('x_um', 'y_um', 'umi')], coords_file, row.names = FALSE, col.names = FALSE, sep = ",")
 
 }
 
