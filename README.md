@@ -37,7 +37,7 @@ Download [sample data](https://drive.google.com/drive/folders/1Fzp5OZB1giX962Esp
 bash src/workflow/prep_warp.sh
 ```
 
-### Part 3: Nonlinear alignment
+### Part 3: Nonlinear alignment and overlay plot generation
 
 - identify as many pairs of fiducials as needed in slicer
 - run following script to perform nonlinear alignment and prepare overlay plots
