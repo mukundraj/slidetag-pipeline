@@ -1,19 +1,21 @@
 name: stags
 channels:
   - simpleitk
-  - anaconda
   - conda-forge
+  - anaconda
   - defaults
 dependencies:
+  - beautifulsoup4=4.11.1=py39hecd8cb5_0
   - blas=1.0=openblas
   - brotli=1.0.9=hb7f2c08_8
   - brotli-bin=1.0.9=hb7f2c08_8
-  - ca-certificates=2023.01.10=hecd8cb5_0
+  - ca-certificates=2022.4.26=hecd8cb5_0
   - contourpy=1.0.7=py39h92daf61_0
   - cycler=0.11.0=pyhd8ed1ab_0
   - fonttools=4.39.4=py39hdc70f33_0
   - freetype=2.11.0=hd8bbffd_0
   - giflib=5.2.1=haf1e3a3_0
+  - icu=58.2=h0a44026_3
   - importlib_resources=5.12.0=pyhd8ed1ab_0
   - jpeg=9e=h6c40b1e_1
   - kiwisolver=1.4.4=py39h92daf61_1
@@ -29,13 +31,17 @@ dependencies:
   - libffi=3.3=hb1e8313_2
   - libgfortran=5.0.0=11_3_0_h97931a8_31
   - libgfortran5=12.2.0=he409387_31
+  - libiconv=1.16=hca72f7f_2
   - liblapack=3.9.0=16_osx64_openblas
   - libopenblas=0.3.21=openmp_h429af6e_3
   - libpng=1.6.39=h6c40b1e_0
   - libtiff=4.4.0=h2cd0358_2
   - libwebp=1.2.4=hf6ce154_1
   - libwebp-base=1.2.4=h6c40b1e_1
+  - libxml2=2.9.14=hbf8cd5e_0
+  - libxslt=1.1.35=h5b33f42_0
   - llvm-openmp=16.0.3=hff08bdf_0
+  - lxml=4.8.0=py39h65b224f_0
   - lz4-c=1.9.4=hcec6c5f_0
   - matplotlib=3.7.1=py39h6e9494a_0
   - matplotlib-base=3.7.1=py39hda11e5a_1
@@ -43,7 +49,7 @@ dependencies:
   - ncurses=6.4=hcec6c5f_0
   - numpy=1.24.3=py39h57a7bef_0
   - numpy-base=1.24.3=py39hc93c6d9_0
-  - openssl=1.1.1t=hca72f7f_0
+  - openssl=1.1.1o=hca72f7f_0
   - packaging=23.1=pyhd8ed1ab_0
   - pillow=9.0.1=py39hde71d04_0
   - pip=23.0.1=py39hecd8cb5_0
@@ -55,6 +61,7 @@ dependencies:
   - setuptools=66.0.0=py39hecd8cb5_0
   - simpleitk=2.2.1=py39h01edc0c_0
   - six=1.16.0=pyh6c4a22f_0
+  - soupsieve=2.3.1=pyhd3eb1b0_0
   - sqlite=3.41.2=h6c40b1e_0
   - tbb=2021.8.0=ha357a0b_0
   - tk=8.6.12=h5d9f67b_0

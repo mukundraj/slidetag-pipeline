@@ -117,6 +117,9 @@ rule prep_rigid:
 		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/T.mrk.json',
 		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/Tfm1.txt',
 
+	conda:
+		'../envs/'+config['envname']+'.yml'
+
 	script:
 		"../src/workflow/prep_rigid.py"
 
