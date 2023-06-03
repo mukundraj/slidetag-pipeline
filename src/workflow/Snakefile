@@ -129,16 +129,14 @@ rule prep_warp:
 	input:
 		tfm1=rules.prep_rigid.output.tfm1,
 		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/tifs/nissls/{config["dataname"]}_nissl.tif',
-		stags_folder=config['homedir']+config['oproot']+'/'+config['dataname']+'/03_rigid/tifs/stags',
 		data=config['homedir']+config['oproot']+'/'+config['dataname']+f'/01_interim/stags_coords',
 
 	output:
-		nissl=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif',
-		stag=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif',
-		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml',
-		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.fcsv',
-		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.fcsv',
-		tfm1ed_pts=config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/tfm1ed_pts.txt',
+		tfm1ed_pts_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tfmed_pts'),
+		# cropped_imgs_dir=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tifs',
+		# mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/'+config['dataname']+'.mrml',
+		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/F.fcsv',
+		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/T.fcsv',
 
 	conda:
 		'../envs/'+config['envname']+'.yml'
@@ -147,19 +145,19 @@ rule prep_warp:
 		"../src/workflow/prep_warp.py"
 
 # rule to create overlay plot from registered stag coords
-rule render_plots:
-	input:
-		nissl=rules.prep_warp.output.nissl,
-		from_fids=rules.prep_warp.output.from_fids, # only to indicate prep_warp ran
-		to_fids=rules.prep_warp.output.to_fids, # only to indicate prep_warp ran
-		tfm1ed_pts=rules.prep_warp.output.tfm1ed_pts,
-		template='templates/warp/warp.mrml',
-		data=rules.prep_warp.input.data,
-	output:
-		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',
+# rule render_plots:
+# 	input:
+# 		nissl=rules.prep_warp.output.nissl,
+# 		from_fids=rules.prep_warp.output.from_fids, # only to indicate prep_warp ran
+# 		to_fids=rules.prep_warp.output.to_fids, # only to indicate prep_warp ran
+# 		tfm1ed_pts=rules.prep_warp.output.tfm1ed_pts,
+# 		template='templates/warp/warp.mrml',
+# 		data=rules.prep_warp.input.data,
+# 	output:
+# 		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',
 
-	conda:
-		'../envs/'+config['envname']+'.yml'
-	script:
-		"../src/workflow/render_plots.py"
+# 	conda:
+# 		'../envs/'+config['envname']+'.yml'
+# 	script:
+# 		"../src/workflow/render_plots.py"
 
