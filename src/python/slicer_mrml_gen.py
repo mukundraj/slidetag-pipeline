@@ -24,8 +24,6 @@ def get_sub_text(stag_imgs):
 
     all_img_str = ''
     for idx, img_name in enumerate(stag_imgs):
-        if img_name == 'bead_plot':
-            continue
 
         soup1 = BeautifulSoup(vvd, 'xml')
         soup2 = BeautifulSoup(vas, 'xml')

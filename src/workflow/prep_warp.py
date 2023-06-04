@@ -1,8 +1,15 @@
 """
-Temporary scratch file for testing functions before adding to main pipeline
+Script to geneate slicer proj files for warping
 
 Created by Mukund on 2023-05-15
 """
+from pathlib import Path
+import sys
+path_root = Path(__file__).parents[2]
+sys.path.append(str(path_root))
+
+import os
+from src.python.slicer_mrml_gen import get_sub_text
 import os
 import numpy as np
 import SimpleITK as sitk
@@ -199,13 +206,33 @@ for f in filenames:
 # # os.system(f'touch {snakemake.output.from_fids}')
 # # os.system(f'touch {snakemake.output.to_fids}')
 
+# generate mrml file for warp from template
+
+stag_imgs_dir = snakemake.output.stag_imgs_dir
+
+# read filenames in stag_imgs_dir
+stag_imgs = os.listdir(stag_imgs_dir)
+stag_imgs = [f for f in stag_imgs if f.endswith('.tif')]
+
+# remove extension from stag_imgs
+stag_imgs = [f.split('.')[0] for f in stag_imgs]
+
+# remove bead_coords from stag_imgs to avoid duplication    
+stag_imgs = [f for f in stag_imgs if f != 'bead_coords']
+
+
+sub_text = get_sub_text(stag_imgs)
+
+
+
 # # copy template files
-# with open("./templates/warp/warp.mrml", "rt") as fin:
-#     with open(f'{snakemake.output.mrml}', "wt") as fout:
-#         for line in fin:
-#             line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')
-#             line = line.replace('fname_stag', f'stag_{snakemake.wildcards.fname}')
-#             fout.write(line)
+with open("./templates/warp/warp.mrml", "rt") as fin:
+    with open(f'{snakemake.output.mrml}', "wt") as fout:
+        for line in fin:
+            line = line.replace('fname_nissl', 'bead_coords_nissl')
+            line = line.replace('fname_stag', 'bead_coords')
+            line = line.replace('<Hidden></Hidden>', f'{sub_text}')
+            fout.write(line)
 
 os.system(f'cp templates/warp/F.fcsv {snakemake.output.from_fids}')
 os.system(f'cp templates/warp/T.fcsv {snakemake.output.to_fids}')

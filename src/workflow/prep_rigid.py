@@ -16,8 +16,10 @@ stag_imgs = [f for f in stag_imgs if f.endswith('.tif')]
 
 # remove extension from stag_imgs
 stag_imgs = [f.split('.')[0] for f in stag_imgs]
+print('stag_imgs', stag_imgs)
 
-
+# remove bead_plot from stag_imgs to avoid duplication
+stag_imgs = [f for f in stag_imgs if f != 'bead_plot']
 
 
 sub_text = get_sub_text(stag_imgs)
