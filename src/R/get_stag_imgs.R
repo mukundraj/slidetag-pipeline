@@ -7,6 +7,7 @@ library(viridis)
 library(Seurat)
 library(readr)
 require(cowplot)
+library(readbitmap)
 
 inpdir <- snakemake@input[['raw_dir']]
 opdir <- snakemake@output[['stag_imgs_dir']]
@@ -50,8 +51,19 @@ if (length(files)==1 && length(files_qs)==1){
   impath <- file.path(opdir, 'bead_plot.png')
   ggsave(impath, dpi=75)
 
+  # get img dims of image
+  img_dims <- dim(read.bitmap(impath))
+  print('img_dims')
+  print(img_dims)
+
+  # normalize coords using extents before writing and normalize
+  sb.data$x_um <- (sb.data$x_um - xlims[1])/(xlims[2]-xlims[1]) * img_dims[1]
+  sb.data$y_um <- (sb.data$y_um - ylims[1])/(ylims[2]-ylims[1]) * img_dims[2]
+
+
   # save coords in opdir_coords folder in csv file named bead_coords.csv and only x and y columns
   coords_file <- file.path(opdir_coords, 'bead_coords.csv')
+
   write.table(sb.data[,c('x_um', 'y_um', 'umi')], coords_file, row.names = FALSE, col.names = FALSE, sep = ",")
 
 
@@ -76,6 +88,7 @@ if (length(files)==1 && length(files_qs)==1){
 
     # keep extents same as bead plot
 
+
     # plot using qplot
     qplot(z$s_1, z$s_2, geom='point', color=I('red'), size=I(1)) + theme_nothing() + 
       scale_x_continuous(expand=c(0,0), limits=xlims) +
@@ -85,6 +98,11 @@ if (length(files)==1 && length(files_qs)==1){
     # save plot in output dir
     impath <- file.path(opdir, paste0('stag_', locidx,'.png'))
     ggsave(impath, dpi=75)
+
+    img_dims <- dim(read.bitmap(impath))
+    # normalize z by extents - 
+    z$s_1 <- (z$s_1 - xlims[1])/(xlims[2]-xlims[1]) * img_dims[1]
+    z$s_2 <- (z$s_2 - ylims[1])/(ylims[2]-ylims[1]) * img_dims[2]
 
     # save  coords in opdir_coords folder
     coords_file <- file.path(opdir_coords, paste0('stag_', locidx,'_coords.csv'))

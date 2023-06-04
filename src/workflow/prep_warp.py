@@ -13,6 +13,7 @@ from PIL import Image
 
 # reads ITK transform file and return extracted affine matrix
 def tfm_pts(tfm_path, pts):
+
     tfm = sitk.ReadTransform(tfm_path)
     print(tfm)
     M = str(tfm).split('\n')[10:13]
@@ -37,27 +38,29 @@ def tfm_pts(tfm_path, pts):
     A[:2,2] = T[:,0]
     A[2,2] = 1
 
-    pts_tfmed = np.matmul(A, pts)
+    # print(tfm.GetInverse().TransformPoint((8, 10, 0)))
+    # print(tfm.GetInverse().TransformPoint((508, 10, 0)))
+    # print(tfm.GetInverse().TransformPoint((520, 515, 0)))
+    # print(tfm.GetInverse().TransformPoint((260, 260, 0)))
+    # print(tfm.GetInverse().TransformPoint((276, 106, 0)))
+
+    # print('M\n', M)
+    # print('O\n', O)
+    # print('C\n', C)
+    # print('T\n', T)
+    # print('A\n', A)
+
+    # invert A
+    A_inv = np.linalg.inv(A)
+
+    pts_tfmed = np.matmul(A_inv, pts)
     return A, pts_tfmed
 
 #  compute bbox of tfmed pts and plot cropped nissl image
-def gen_cropped_nissl_img(pts_tfmed, nissl_path, op_path):
-    # nissl_img = imread(nissl_path)
-    # img = rgb2gray(imread(nissl_path))
-    # A[0,2] = 1000
-    # A[1,2] = 1000
-    # A, pts_tfmed = tfm_pts(tfm_path, pts)
-
-    # get bounding box of pts_tfmed
-    bbox = np.zeros((2,2))
-    bbox[0,0] = np.min(pts_tfmed[0,:])
-    bbox[0,1] = np.max(pts_tfmed[0,:])
-    bbox[1,0] = np.min(pts_tfmed[1,:])
-    bbox[1,1] = np.max(pts_tfmed[1,:])
-    bbox = bbox.astype(int)
+def gen_and_save_cropped_nissl_img(pts_tfmed, nissl_path, op_path, bbox):
 
     # print('pts_tfmed\n', pts_tfmed)
-    # print('bbox\n', bbox)
+    print('bbox\n', bbox)
     img = Image.open(nissl_path)
     area = (bbox[0,0], bbox[1,0], bbox[0,1], bbox[1,1])
     cropped_img = img.crop(area).convert('RGB')
@@ -69,18 +72,7 @@ def gen_cropped_nissl_img(pts_tfmed, nissl_path, op_path):
     cropped_img.save(op_path, 'TIFF',dpi=(72,72))
 
 # reads tfmed points and plots an image bounded by bbox of transformed cell positions
-def gen_tfmed_stag_img(pts_tfmed, op_path):
-    # A, pts_tfmed = tfm_pts(tfm_path, pts)
-    # pts_tfmed = np.matmul(A, pts)
-    # get bounding box of pts_tfmed
-    bbox = np.zeros((2,2))
-    bbox[0,0] = np.min(pts_tfmed[0,:])
-    bbox[0,1] = np.max(pts_tfmed[0,:])
-    bbox[1,0] = np.min(pts_tfmed[1,:])
-    bbox[1,1] = np.max(pts_tfmed[1,:])
-    bbox = bbox.astype(int)
-    # print('pts_tfmed2\n', pts_tfmed)
-    # print('bbox2\n', bbox)
+def gen_and_save_tfmed_stag_img(pts_tfmed, op_path, bbox):
 
     # get bbox dimensions along both axes
     bbox_dims = np.zeros((2,1))
@@ -98,7 +90,7 @@ def gen_tfmed_stag_img(pts_tfmed, op_path):
 
     # plt.margins(0)
     # plt.axis('off')
-    plt.scatter(pts_tfmed[0,:], pts_tfmed[1,:], s=500, c='#000000')
+    plt.scatter(pts_tfmed[0,:], pts_tfmed[1,:], s=10, c='#000000')
     plt.xlim(bbox[0,0], bbox[0,1])
     plt.ylim(bbox[1,0], bbox[1,1])
 
@@ -107,6 +99,14 @@ def gen_tfmed_stag_img(pts_tfmed, op_path):
     im.convert('RGB').save(op_path, 'TIFF',dpi=(72,72))
 
 
+def get_bbox(pts_tfmed):
+    bbox = np.zeros((2,2))
+    bbox[0,0] = np.min(pts_tfmed[0,:])# - 0.1*(np.max(pts_tfmed[0,:]) - np.min(pts_tfmed[0,:]))
+    bbox[0,1] = np.max(pts_tfmed[0,:])# + 0.1*(np.max(pts_tfmed[0,:]) - np.min(pts_tfmed[0,:]))
+    bbox[1,0] = np.min(pts_tfmed[1,:])# - 0.1*(np.max(pts_tfmed[1,:]) - np.min(pts_tfmed[1,:]))
+    bbox[1,1] = np.max(pts_tfmed[1,:])# + 0.1*(np.max(pts_tfmed[1,:]) - np.min(pts_tfmed[1,:]))
+    bbox = bbox.astype(int)
+    return bbox
 
 
 data_dir = snakemake.input.data
@@ -117,8 +117,36 @@ filenames = os.listdir(snakemake.input.data)
 # filter filenames to only include .csv files
 filenames = [f for f in filenames if f.endswith('.csv')]
 
+bbox = None
 # loop over filenames
 for f in filenames:
+    if f == 'bead_coords.csv':
+        test_pts = np.genfromtxt(f'{data_dir}/{f}', delimiter=',', names=None, dtype=np.float64).T
+        test_pts = test_pts[:2]
+        # homogenize points
+        test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
+
+
+        # transform points and write to file
+        A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
+        op_file_tfmed_pts = os.path.join(op_dir, f)
+        np.savetxt(op_file_tfmed_pts, pts_tfmed[:2].T, delimiter=",")
+        bbox = get_bbox(pts_tfmed)
+        print('bbbox\n', bbox)
+
+
+        # os.system('touch ' + op_file)
+        # change file extension to .tif
+        ip_nis_file = snakemake.input.nissl
+        os.system('mkdir -p ' + snakemake.output.nis_imgs_dir)
+        op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'.tif'
+        gen_and_save_cropped_nissl_img(pts_tfmed, ip_nis_file, op_nis_name, bbox)
+
+# loop over filenames
+for f in filenames:
+    if f == 'bead_coords.csv':
+        continue
+
     ip_file = os.path.join(data_dir, f)
 
     op_file = os.path.join(op_dir, f)
@@ -128,11 +156,19 @@ for f in filenames:
     print(ip_file)
     print(np.shape(pts))
     test_pts = np.array([pts[0,:], pts[1,:], np.ones(np.shape(pts)[1])], dtype=np.float64)
+    test_pts = test_pts[:2]
+    # homogenize points
+    test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
+
+    # transform points and write to file
     A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
     np.savetxt(op_file, pts_tfmed[:2].T, delimiter=",")
 
-    # os.system('touch ' + op_file)
 
+    # make stags imgs
+    os.system('mkdir -p ' + snakemake.output.stag_imgs_dir)
+    op_stag_name = snakemake.output.stag_imgs_dir+'/'+f.split('.')[0]+'.tif'
+    gen_and_save_tfmed_stag_img(pts_tfmed, op_stag_name, bbox)
 
 # # create test 2D points in homogeneous coordinates
 # # read csv using numpy

@@ -133,7 +133,8 @@ rule prep_warp:
 
 	output:
 		tfm1ed_pts_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tfmed_pts'),
-		# cropped_imgs_dir=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tifs',
+		nis_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tifs/nissls'),
+		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/tifs/stags'),
 		# mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/'+config['dataname']+'.mrml',
 		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/F.fcsv',
 		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/T.fcsv',
