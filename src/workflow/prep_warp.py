@@ -226,7 +226,7 @@ sub_text = get_sub_text(stag_imgs)
 
 
 # # copy template files
-with open("./templates/warp/warp.mrml", "rt") as fin:
+with open(snakemake.input.mrml_template, "rt") as fin:
     with open(f'{snakemake.output.mrml}', "wt") as fout:
         for line in fin:
             line = line.replace('fname_nissl', 'bead_coords_nissl')
@@ -234,6 +234,6 @@ with open("./templates/warp/warp.mrml", "rt") as fin:
             line = line.replace('<Hidden></Hidden>', f'{sub_text}')
             fout.write(line)
 
-os.system(f'cp templates/warp/F.fcsv {snakemake.output.from_fids}')
-os.system(f'cp templates/warp/T.fcsv {snakemake.output.to_fids}')
+os.system(f'cp {snakemake.input.from_fids} {snakemake.output.from_fids}')
+os.system(f'cp {snakemake.input.to_fids} {snakemake.output.to_fids}')
 # # os.system(f'touch {snakemake.output.tfm2}') # don't add this to output, empty file takes slicer to undesired state
