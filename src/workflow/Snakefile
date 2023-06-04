@@ -141,6 +141,7 @@ rule prep_warp:
 		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/'+config['dataname']+'.mrml',
 		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/F.fcsv',
 		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/T.fcsv',
+		bbox=config['homedir']+config['oproot']+'/'+config['dataname']+'/04_warp/bbox.txt',
 
 	conda:
 		'../envs/'+config['envname']+'.yml'
@@ -149,18 +150,19 @@ rule prep_warp:
 		"../src/workflow/prep_warp.py"
 
 # # rule to create overlay plot from registered stag coords
-# rule render_plots:
-# 	input:
-# 		nissl=rules.prep_warp.output.nissl,
-# 		from_fids=rules.prep_warp.output.from_fids, # only to indicate prep_warp ran
-# 		to_fids=rules.prep_warp.output.to_fids, # only to indicate prep_warp ran
-# 		tfm1ed_pts=rules.prep_warp.output.tfm1ed_pts,
-# 		data=rules.prep_warp.input.data,
-# 	output:
-# 		olayplot=config['homedir']+config['oproot']+'/'+config['dataname']+'/05_plots/{fname}/overlay_{fname}.png',
+rule render_plots:
+	input:
+		nissl_dir=rules.prep_warp.output.nis_imgs_dir,
+		from_fids=rules.prep_warp.output.from_fids,
+		to_fids=rules.prep_warp.output.to_fids,
+		tfm1ed_pts_dir=rules.prep_warp.output.tfm1ed_pts_dir,
+		bbox_file=rules.prep_warp.output.bbox,
+		# data=rules.prep_warp.input.data, # initially added for color info
+	output:
+		olay_plots_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/05_plots'),
 
-# 	conda:
-# 		'../envs/'+config['envname']+'.yml'
-# 	script:
-# 		"../src/workflow/render_plots.py"
+	conda:
+		'../envs/'+config['envname']+'.yml'
+	script:
+		"../src/workflow/render_plots.py"
 

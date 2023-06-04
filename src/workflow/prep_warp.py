@@ -141,6 +141,8 @@ for f in filenames:
         bbox = get_bbox(pts_tfmed)
         print('bbbox\n', bbox)
 
+        # save bbox as .csv
+        np.savetxt(snakemake.output.bbox, bbox, delimiter=",")
 
         # os.system('touch ' + op_file)
         # change file extension to .tif

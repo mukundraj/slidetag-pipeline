@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 
 def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
-    print(f'{snakemake.input.tfm1ed_pts}')
-    print(f'{snakemake.input.from_fids}')
-    print(f'{snakemake.input.to_fids}')
+    print(f'{tfm1ed_pts_file}')
+    print(f'{from_fids_file}')
+    print(f'{to_fids_file}')
 
 
     # read tfm1ed_pts_file using np loadtxt
@@ -25,6 +25,9 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     width = bbox_dims[0]
     height = bbox_dims[1]
 
+    # invert y axis by subtracting from height
+    tfm1ed_pts[:,1] = height - tfm1ed_pts[:,1]
+
     # height=img_width_ss_tfmed # dimensions of transformed ss images exported from histolozee
     # width=img_height_ss_tfmed
     # # pts_tfmed_ss_nifti = [[-pt[0]*height, -pt[1]*width] for pt in pts_tfmed_ss_normalized]
@@ -40,7 +43,7 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     tfm_folder = os.path.split(tfm1ed_pts_file)[0]
     print('tfm_folder', tfm_folder)
 
-    intrim_pts_file = tfm_folder+"/intrim_pts.csv"
+    intrim_pts_file = tfm_folder+"/../intrim_pts.csv"
     with open(intrim_pts_file, 'w', newline='\n') as csvfile:
         writer = csv.writer(csvfile)
         for row in pts_tfmed_ss_nifti:
@@ -49,7 +52,7 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     from_fiducials_file = from_fids_file
     to_fiducials_file = to_fids_file
     # nrrd_path = labelmap_folder+"/lmap_"+nis_idx+".nrrd"
-    temp_output_csv_file = tfm_folder+"/tmp_output.csv"
+    temp_output_csv_file = tfm_folder+"/../tmp_output.csv"
     # call cpp script to transform output of previous step with fiduals/TPS, sample from nrrd and write output
     # cmd = f'./build/cmapper2 {from_fiducials_file} {to_fiducials_file} {intrim_pts_file} None 0 {temp_output_csv_file}'
     # print(cmd)
@@ -83,15 +86,75 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
 
     return pos_warped_coords, bbox, bbox_dims
 
+# read all files in tfm1ed_pts_dir
+tfm1ed_pts_files = os.listdir(snakemake.input.tfm1ed_pts_dir)
+
+# keep only csv files in tfm1ed_pts_files
+tfm1ed_pts_files = [f for f in tfm1ed_pts_files if f.endswith('.csv')]
+
+# remove .csv from tfm1ed_pts_files
+tfm1ed_pts_files = [f.split('.')[0] for f in tfm1ed_pts_files]
+
+# iterate over tfm1ed_pts_files
+os.system(f'mkdir -p {snakemake.output.olay_plots_dir}')
+
+
+for tfm1ed_pts_file in tfm1ed_pts_files:
+    ip_fpath = os.path.join(snakemake.input.tfm1ed_pts_dir, tfm1ed_pts_file) + '.csv'
+    op_fpath = os.path.join(snakemake.output.olay_plots_dir, tfm1ed_pts_file) + '.png'
+
+    # remove '_coords' from op_fpath string
+    op_fpath = op_fpath.replace('_coords', '')
+
+    # os.system(f'touch {op_fpath}')
+
+    print(ip_fpath)
+    pos_warped_coords, XXbbox, XXbbox_dims = get_tfmed_pts(ip_fpath, snakemake.input.from_fids, snakemake.input.to_fids)
+    # pos_warped_coords = np.loadtxt(ip_fpath, delimiter=',')
+    print(pos_warped_coords)
+
+    # read bbox from bbox_file
+    bbox_file = snakemake.input.bbox_file
+    bbox = np.loadtxt(bbox_file, delimiter=',').T
+    bbox_dims = bbox[1] - bbox[0]
+
+    # invert y axis by subtracting from max y
+    pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
+    # pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
+
+
+    my_dpi = 72
+    fig = plt.figure(figsize=(bbox_dims[0]/my_dpi, bbox_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
+    ax = plt.Axes(fig, [0., 0., 1, 1])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+    print('pos_warped_coords', pos_warped_coords)
+    print('bbox', bbox)
+    print('bbox_dims', bbox_dims)
+    # plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
+    plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=50, c='red')
+    plt.xlim(bbox[0,0], bbox[1,0])
+    plt.ylim(bbox[0,1], bbox[1,1])
+
+    tfmed_plot = f'{snakemake.output.olay_plots_dir}/tmp_tfmed_plot.png'
+    plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
+    plt.close()
+
+    nissl_file = f'{snakemake.input.nissl_dir}/bead_coords_nissl.tif'
+    cmd = f'convert {nissl_file} {tfmed_plot} -compose over -composite {op_fpath}'
+    os.system(cmd)
+
+exit(0)
+
 # transform coords based on T2
 pos_warped_coords, bbox, bbox_dims = get_tfmed_pts(snakemake.input.tfm1ed_pts, snakemake.input.from_fids, snakemake.input.to_fids)
 
 # plot tfmed points - keep bbox same as nissl dimensions
 
-# plot pos_warped_coords with bounding box bbox
-pts = np.genfromtxt(f'{snakemake.input.data}', delimiter=',', names=True, dtype=np.float64).T
-v1 = (pts['v1'])
-print('v1', v1.shape)
+# # plot pos_warped_coords with bounding box bbox
+# pts = np.genfromtxt(f'{snakemake.input.data}', delimiter=',', names=True, dtype=np.float64).T
+# v1 = (pts['v1'])
+# print('v1', v1.shape)
 
 op_folder = os.path.split(snakemake.input.tfm1ed_pts)[0]
 my_dpi = 72
@@ -100,7 +163,8 @@ ax = plt.Axes(fig, [0., 0., 1, 1])
 ax.set_axis_off()
 fig.add_axes(ax)
 print('pos_warped_coords', pos_warped_coords)
-plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
+# plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
+plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500,)
 plt.xlim(bbox[0,0], bbox[0,1])
 plt.ylim(bbox[1,0], bbox[1,1])
 
