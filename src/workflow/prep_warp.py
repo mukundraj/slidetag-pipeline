@@ -57,7 +57,7 @@ def tfm_pts(tfm_path, pts):
     return A, pts_tfmed
 
 #  compute bbox of tfmed pts and plot cropped nissl image
-def gen_and_save_cropped_nissl_img(pts_tfmed, nissl_path, op_path, bbox):
+def gen_and_save_cropped_nissl_img(nissl_path, op_path, bbox):
 
     # print('pts_tfmed\n', pts_tfmed)
     print('bbox\n', bbox)
@@ -90,7 +90,7 @@ def gen_and_save_tfmed_stag_img(pts_tfmed, op_path, bbox):
 
     # plt.margins(0)
     # plt.axis('off')
-    plt.scatter(pts_tfmed[0,:], pts_tfmed[1,:], s=10, c='#000000')
+    plt.scatter(pts_tfmed[0,:], pts_tfmed[1,:], s=5, c='#000000')
     plt.xlim(bbox[0,0], bbox[0,1])
     plt.ylim(bbox[1,0], bbox[1,1])
 
@@ -140,12 +140,11 @@ for f in filenames:
         ip_nis_file = snakemake.input.nissl
         os.system('mkdir -p ' + snakemake.output.nis_imgs_dir)
         op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'.tif'
-        gen_and_save_cropped_nissl_img(pts_tfmed, ip_nis_file, op_nis_name, bbox)
+        print('op_nis_name\n', op_nis_name)
+        gen_and_save_cropped_nissl_img(ip_nis_file, op_nis_name, bbox)
 
 # loop over filenames
 for f in filenames:
-    if f == 'bead_coords.csv':
-        continue
 
     ip_file = os.path.join(data_dir, f)
 
