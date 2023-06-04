@@ -139,7 +139,7 @@ for f in filenames:
         # change file extension to .tif
         ip_nis_file = snakemake.input.nissl
         os.system('mkdir -p ' + snakemake.output.nis_imgs_dir)
-        op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'.tif'
+        op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'_nissl.tif'
         print('op_nis_name\n', op_nis_name)
         gen_and_save_cropped_nissl_img(ip_nis_file, op_nis_name, bbox)
 
