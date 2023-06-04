@@ -76,7 +76,8 @@ def gen_and_save_cropped_nissl_img(nissl_path, op_path, bbox):
     # px[-1,1] = (255, 255, 255)
     print('channel\n', np.shape(cropped_img))
     # cropped_img.show()
-    cropped_img.save(op_path, 'TIFF',dpi=(72,72))
+    cropped_img.save(op_path, 'TIFF')
+    # cropped_img.save(op_path, 'TIFF',dpi=(72,72))
 
 # reads tfmed points and plots an image bounded by bbox of transformed cell positions
 def gen_and_save_tfmed_stag_img(pts_tfmed, op_path, bbox):
@@ -103,7 +104,8 @@ def gen_and_save_tfmed_stag_img(pts_tfmed, op_path, bbox):
 
     plt.savefig(op_path, bbox_inches='tight', pad_inches=0, transparent=False, dpi='figure', format='tiff')
     im = Image.open(op_path)
-    im.convert('RGB').save(op_path, 'TIFF',dpi=(72,72))
+    # im.convert('RGB').save(op_path, 'TIFF',dpi=(72,72))
+    im.convert('RGB').save(op_path, 'TIFF')
 
 
 def get_bbox(pts_tfmed):
@@ -136,8 +138,7 @@ for f in filenames:
 
         # transform points and write to file
         A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
-        op_file_tfmed_pts = os.path.join(op_dir, f)
-        np.savetxt(op_file_tfmed_pts, pts_tfmed[:2].T, delimiter=",")
+
         bbox = get_bbox(pts_tfmed)
         print('bbbox\n', bbox)
 
@@ -151,6 +152,14 @@ for f in filenames:
         op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'_nissl.tif'
         print('op_nis_name\n', op_nis_name)
         gen_and_save_cropped_nissl_img(ip_nis_file, op_nis_name, bbox)
+
+        # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
+        # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
+        # pts_tfmed[1,:] = pts_tfmed[1,:] - bbox[1,0]
+
+        # save tfmed points as .csv
+        op_file_tfmed_pts = os.path.join(op_dir, f)
+        np.savetxt(op_file_tfmed_pts, pts_tfmed[:2].T, delimiter=",")
 
 # loop over filenames
 for f in filenames:
@@ -170,6 +179,12 @@ for f in filenames:
 
     # transform points and write to file
     A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
+
+    # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
+    # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
+    # pts_tfmed[1,:] = pts_tfmed[1,:] - bbox[1,0]
+
+    # save tfmed points as .csv
     np.savetxt(op_file, pts_tfmed[:2].T, delimiter=",")
 
 

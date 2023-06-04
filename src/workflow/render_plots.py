@@ -25,8 +25,13 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     width = bbox_dims[0]
     height = bbox_dims[1]
 
-    # invert y axis by subtracting from height
+    # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
+    tfm1ed_pts[:,0] = tfm1ed_pts[:,0] - bbox[0,0]
+    tfm1ed_pts[:,1] = tfm1ed_pts[:,1] - bbox[0,1]
+
+    # invert y axis by subtracting from height and invert x axis by subtracting from width
     tfm1ed_pts[:,1] = height - tfm1ed_pts[:,1]
+
 
     # height=img_width_ss_tfmed # dimensions of transformed ss images exported from histolozee
     # width=img_height_ss_tfmed
@@ -100,6 +105,8 @@ os.system(f'mkdir -p {snakemake.output.olay_plots_dir}')
 
 
 for tfm1ed_pts_file in tfm1ed_pts_files:
+    # if tfm1ed_pts_file != 'bead_coords':
+    #     continue
     ip_fpath = os.path.join(snakemake.input.tfm1ed_pts_dir, tfm1ed_pts_file) + '.csv'
     op_fpath = os.path.join(snakemake.output.olay_plots_dir, tfm1ed_pts_file) + '.png'
 
@@ -117,11 +124,17 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     bbox_file = snakemake.input.bbox_file
     bbox = np.loadtxt(bbox_file, delimiter=',').T
     bbox_dims = bbox[1] - bbox[0]
+    print('bbox_dims', bbox_dims)
 
     # invert y axis by subtracting from max y
     pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
     # pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
+    # invert x axis by subtracting from max x
+    # pos_warped_coords[:,0] = bbox_dims[0] - pos_warped_coords[:,0]
+    print(pos_warped_coords)
 
+    # tfm1ed_pts = np.loadtxt(ip_fpath, delimiter=',')
+    # pos_warped_coords = tfm1ed_pts.copy()
 
     my_dpi = 72
     fig = plt.figure(figsize=(bbox_dims[0]/my_dpi, bbox_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
@@ -133,8 +146,10 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     print('bbox_dims', bbox_dims)
     # plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
     plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=50, c='red')
-    plt.xlim(bbox[0,0], bbox[1,0])
-    plt.ylim(bbox[0,1], bbox[1,1])
+    # plt.xlim(bbox[0,0], bbox[1,0])
+    # plt.ylim(bbox[0,1], bbox[1,1])
+    plt.xlim(0, bbox_dims[0])
+    plt.ylim(0, bbox_dims[1])
 
     tfmed_plot = f'{snakemake.output.olay_plots_dir}/tmp_tfmed_plot.png'
     plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
