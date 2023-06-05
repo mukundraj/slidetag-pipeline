@@ -48,7 +48,7 @@ rule get_stag_imgs:
 	conda:
 		'../envs/'+config['r_envname']+'.yml'
 	script:
-		"../src/R/get_stag_imgs.R"
+		"../src/R/get_stag_imgs2.R"
 
 # copies nissl img from raw folder to raw/nissls folder
 rule get_nissl_imgs:
