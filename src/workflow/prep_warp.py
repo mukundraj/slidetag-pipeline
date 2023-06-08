@@ -20,7 +20,9 @@ import PIL
 # from produtils import dprint
 
 # reads ITK transform file and return extracted affine matrix
-def tfm_pts(tfm_path, pts):
+# tfmed_yrange - if -1, indicates do operations on pts directly (needed initialy to determine tfmed_yrange)
+#                if 0, indicates do operations after converting to slicer view space where [0,0] is at top left
+def tfm_pts(tfm_path, pts, tfmed_yrange):
 
     tfm = sitk.ReadTransform(tfm_path)
     # print(tfm)
@@ -46,20 +48,23 @@ def tfm_pts(tfm_path, pts):
     A[:2,2] = T[:,0]
     A[2,2] = 1
 
-    print(tfm.GetInverse().TransformPoint((0, 0, 0)))
-    print(tfm.GetInverse().TransformPoint((525, 0, 0)))
-    print(tfm.GetInverse().TransformPoint((525, 525, 0)))
-    print(tfm.GetInverse().TransformPoint((0, 525, 0)))
-    print(tfm.GetInverse().TransformPoint((341, 224, 0)))
-    pts = pts[:2, :]
+    # print(tfm.GetInverse().TransformPoint((0, 0, 0)))
+    # print(tfm.GetInverse().TransformPoint((525, 0, 0)))
+    # print(tfm.GetInverse().TransformPoint((525, 525, 0)))
+    # print(tfm.GetInverse().TransformPoint((0, 525, 0)))
+    # print(tfm.GetInverse().TransformPoint((341, 224, 0)))
+    pts_tmp = pts[:2, :]
 
     # subtract y axis from 525 to get correct y axis
-    pts[1, :] = 525 - pts[1, :]
-    pts = np.vstack((pts, np.zeros((1, pts.shape[1]))))
-    print('pts shape', pts.shape)
+    if tfmed_yrange == -1:
+        pts_tmp[1, :] =   pts_tmp[1, :]
+    else:
+        pts_tmp[1, :] =  tfmed_yrange - pts_tmp[1, :]
+
     pts_tfmed = []
-    for i in range(pts.shape[1]):
-        pts_tfmed.append(tfm.GetInverse().TransformPoint(pts[:, i].T))
+    pts_tmp = np.vstack((pts_tmp, np.zeros((1, pts_tmp.shape[1]))))
+    for i in range(pts_tmp.shape[1]):
+        pts_tfmed.append(tfm.GetInverse().TransformPoint(pts_tmp[:, i].T))
     pts_tfmed = np.array(pts_tfmed).T
 
 
@@ -157,6 +162,7 @@ filenames = os.listdir(snakemake.input.data)
 filenames = [f for f in filenames if f.endswith('.csv')]
 
 bbox = None
+tfmed_yrange = None
 # loop over filenames
 for f in filenames:
     if f == 'bead_coords.csv':
@@ -174,6 +180,7 @@ for f in filenames:
         
         # homogenize points
         test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
+        print('test_pts', test_pts)
         
 
         print('test_pts homo shape\n', test_pts.shape)
@@ -181,8 +188,19 @@ for f in filenames:
         bbbox_init = get_bbox(test_pts)
         print('bbbox_init', bbbox_init)
 
+        # get bbox after tfm1
+        A, tfmed_tst_pts = tfm_pts(snakemake.input.tfm1, test_pts, -1)
+        tfmed_tst_pts_bbox = get_bbox(tfmed_tst_pts)
+        tfmed_yrange = tfmed_tst_pts_bbox[1,1] - tfmed_tst_pts_bbox[1,0]
+        print('tfmed_tst_pts bbox', tfmed_tst_pts_bbox)
+        print('tfmed_tst_pts bbox y range', tfmed_yrange)
+        # bbox_homo = np.array([[bbox]])
+
+
+        # get tf1ed_bbox_dims
+
         # transform points and write to file
-        A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
+        A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, tfmed_yrange)
 
         # print pts tfmed shape
         print('pts tfmed shape', np.shape(pts_tfmed[0,:]))
@@ -219,7 +237,11 @@ for f in filenames:
         np.savetxt(op_file_tfmed_pts, pts_tfmed[:2].T, delimiter=",")
 
 # loop over filenames
+# make stags imgs
+os.system('mkdir -p ' + snakemake.output.stag_imgs_dir)
 for f in filenames:
+    # if f != 'bead_coords.csv':
+    #     continue
 
     ip_file = os.path.join(data_dir, f)
 
@@ -235,7 +257,7 @@ for f in filenames:
     test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
 
     # transform points and write to file
-    A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
+    A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, tfmed_yrange)
 
     # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
     # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
@@ -253,40 +275,8 @@ for f in filenames:
     np.savetxt(op_file, pts_tfmed[:2].T, delimiter=",")
 
 
-    # make stags imgs
-    os.system('mkdir -p ' + snakemake.output.stag_imgs_dir)
     op_stag_name = snakemake.output.stag_imgs_dir+'/'+f.split('.')[0]+'.tif'
     gen_and_save_tfmed_stag_img(pts_tfmed, op_stag_name, bbox)
-
-# # create test 2D points in homogeneous coordinates
-# # read csv using numpy
-# pts = np.genfromtxt(f'{snakemake.input.data}', delimiter=',', names=True, dtype=np.float64).T
-# print(pts['x'])
-
-# # joint pts[x] and pts[y] into a single array
-# test_pts = np.array([pts['x'], pts['y'], np.ones(len(pts['x']))], dtype=np.float64)
-# print('pts\n', pts)
-
-
-
-
-# # topr = 1050
-# # test_pts = np.array([[0,0,1],[topr,0,1],[0,topr,1],[topr,topr,1]], dtype=np.float64).T
-# # print('testpts\n', test_pts)
-
-# print('tfm1', f'{snakemake.input.tfm1}')
-
-# A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
-# print('pts_tfmed\n', pts_tfmed)
-# np.savetxt(snakemake.output.tfm1ed_pts, pts_tfmed[:2].T, delimiter=",")
-# tfm_nissl(pts_tfmed, snakemake.input.nissl, snakemake.output.nissl)
-
-# # copy nissl image after cropping bbox after transform stag coords
-# tfm_stag(pts_tfmed, snakemake.output.stag)
-
-# # os.system(f'touch {snakemake.output.mrml}')
-# # os.system(f'touch {snakemake.output.from_fids}')
-# # os.system(f'touch {snakemake.output.to_fids}')
 
 # generate mrml file for warp from template
 
