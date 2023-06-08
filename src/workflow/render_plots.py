@@ -5,7 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 
 
-def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
+def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file, bbox):
     print(f'{tfm1ed_pts_file}')
     print(f'{from_fids_file}')
     print(f'{to_fids_file}')
@@ -16,8 +16,8 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     print('tfmed pts', tfm1ed_pts.shape)
 
     # get bounding box of tfm1ed_pts
-    bbox = np.array([np.min(tfm1ed_pts, axis=0), np.max(tfm1ed_pts, axis=0)])
-    print('bbox', bbox)
+    # bbox = np.array([np.min(tfm1ed_pts, axis=0), np.max(tfm1ed_pts, axis=0)])
+    # print('bboxx', bbox)
 
     # get bbox dimensions
     bbox_dims = bbox[1] - bbox[0]
@@ -25,12 +25,17 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     width = bbox_dims[0]
     height = bbox_dims[1]
 
+
     # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
     tfm1ed_pts[:,0] = tfm1ed_pts[:,0] - bbox[0,0]
     tfm1ed_pts[:,1] = tfm1ed_pts[:,1] - bbox[0,1]
+    # tfm1ed_pts[:,0] = tfm1ed_pts[:,0] - 391.9#attn
+    # tfm1ed_pts[:,1] = tfm1ed_pts[:,1] - 235.8
+    print('minpts', np.min(tfm1ed_pts, axis=0))
+    print('maxpts', np.max(tfm1ed_pts, axis=0))
 
     # invert y axis by subtracting from height and invert x axis by subtracting from width
-    tfm1ed_pts[:,1] = height - tfm1ed_pts[:,1]
+    # tfm1ed_pts[:,1] = height - tfm1ed_pts[:,1]
 
 
     # height=img_width_ss_tfmed # dimensions of transformed ss images exported from histolozee
@@ -39,8 +44,8 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     # pts_tfmed_ss_nifti = [[-pt[0]*width, -pt[1]*height] for pt in tfm1ed_pts]]
 
     pts_tfmed_ss_nifti = np.zeros(tfm1ed_pts.shape)
-    pts_tfmed_ss_nifti[:,0] = -tfm1ed_pts[:,0]
-    pts_tfmed_ss_nifti[:,1] = -tfm1ed_pts[:,1]
+    pts_tfmed_ss_nifti[:,0] = -1*tfm1ed_pts[:,0]
+    pts_tfmed_ss_nifti[:,1] = -1*tfm1ed_pts[:,1]
     pts_tfmed_ss_nifti = list(pts_tfmed_ss_nifti)
 
     # warped_coords
@@ -89,7 +94,7 @@ def get_tfmed_pts(tfm1ed_pts_file, from_fids_file, to_fids_file):
     pos_warped_coords = [ [-float(pt[0]), -float(pt[1])] for pt in warped_coords ]
     pos_warped_coords = np.array(pos_warped_coords)
 
-    return pos_warped_coords, bbox, bbox_dims
+    return pos_warped_coords, bbox, bbox_dims, tfm1ed_pts
 
 # read all files in tfm1ed_pts_dir
 tfm1ed_pts_files = os.listdir(snakemake.input.tfm1ed_pts_dir)
@@ -115,26 +120,26 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
 
     # os.system(f'touch {op_fpath}')
 
-    print(ip_fpath)
-    pos_warped_coords, XXbbox, XXbbox_dims = get_tfmed_pts(ip_fpath, snakemake.input.from_fids, snakemake.input.to_fids)
-    # pos_warped_coords = np.loadtxt(ip_fpath, delimiter=',')
-    print(pos_warped_coords)
-
     # read bbox from bbox_file
     bbox_file = snakemake.input.bbox_file
     bbox = np.loadtxt(bbox_file, delimiter=',').T
     bbox_dims = bbox[1] - bbox[0]
     print('bbox_dims', bbox_dims)
 
+    print(ip_fpath)
+    pos_warped_coords, XXbbox, XXbbox_dims, tfm1ed_pts = get_tfmed_pts(ip_fpath, snakemake.input.from_fids, snakemake.input.to_fids, bbox)
+    # pos_warped_coords = np.loadtxt(ip_fpath, delimiter=',')
+    # print(pos_warped_coords)
+    # pos_warped_coords = -1 * pos_warped_coords
+
+
     # invert y axis by subtracting from max y
-    pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
+    # pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
     # pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
     # invert x axis by subtracting from max x
     # pos_warped_coords[:,0] = bbox_dims[0] - pos_warped_coords[:,0]
-    print(pos_warped_coords)
-
-    # tfm1ed_pts = np.loadtxt(ip_fpath, delimiter=',')
-    # pos_warped_coords = tfm1ed_pts.copy()
+    # print(pos_warped_coords)
+    np.savetxt(op_fpath+'.txt', pos_warped_coords, delimiter=',')
 
     my_dpi = 72
     fig = plt.figure(figsize=(bbox_dims[0]/my_dpi, bbox_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
@@ -144,12 +149,16 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     print('pos_warped_coords', pos_warped_coords)
     print('bbox', bbox)
     print('bbox_dims', bbox_dims)
+    # bbox_dims = [988.1-391.9, 834.2-235.8] # attn
     # plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
     plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=50, c='red')
+    # plt.scatter(tfm1ed_pts[:,0], tfm1ed_pts[:,1], s=50, c='red')
     # plt.xlim(bbox[0,0], bbox[1,0])
     # plt.ylim(bbox[0,1], bbox[1,1])
     plt.xlim(0, bbox_dims[0])
     plt.ylim(0, bbox_dims[1])
+    ax = plt.gca()
+    ax.set_ylim(ax.get_ylim()[::-1])
 
     tfmed_plot = f'{snakemake.output.olay_plots_dir}/tmp_tfmed_plot.png'
     plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')

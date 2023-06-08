@@ -50,7 +50,7 @@ if (length(files_qs)==1){
   print('ylims')
   print(ylims)
 
-  qplot(cellembs_nona$s_1, cellembs_nona$s_2, geom='point', color=I('red'), size=I(0.1)) + theme_nothing() +
+  qplot(cellembs_nona$s_1, cellembs_nona$s_2, geom='point', color=I('red'), size=I(2)) + theme_nothing() +
     scale_x_continuous(expand=c(0,0), limits=xlims) +
     scale_y_continuous(expand=c(0,0), limits=ylims) +
     labs(x = NULL, y = NULL)&coord_fixed()
@@ -69,7 +69,7 @@ if (length(files_qs)==1){
     sub_cellembs <- cellembs_nona[cellembs_nona$typ==cell,]
     print(dim(sub_cellembs))
 
-    qplot(sub_cellembs$s_1, sub_cellembs$s_2, geom='point', color=I('red'), size=I(0.1)) + theme_nothing() +
+    qplot(sub_cellembs$s_1, sub_cellembs$s_2, geom='point', color=I('red'), size=I(2)) + theme_nothing() +
       scale_x_continuous(expand=c(0,0), limits=xlims) +
       scale_y_continuous(expand=c(0,0), limits=ylims) +
       labs(x = NULL, y = NULL)&coord_fixed()

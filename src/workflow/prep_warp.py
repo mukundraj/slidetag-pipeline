@@ -15,6 +15,7 @@ import numpy as np
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
 from PIL import Image
+import PIL
 
 # from produtils import dprint
 
@@ -22,7 +23,7 @@ from PIL import Image
 def tfm_pts(tfm_path, pts):
 
     tfm = sitk.ReadTransform(tfm_path)
-    print(tfm)
+    # print(tfm)
     M = str(tfm).split('\n')[10:13]
     M = [i.strip().split(' ') for i in M]
     M = [[float(j) for j in i] for i in M]
@@ -45,22 +46,43 @@ def tfm_pts(tfm_path, pts):
     A[:2,2] = T[:,0]
     A[2,2] = 1
 
-    # print(tfm.GetInverse().TransformPoint((8, 10, 0)))
-    # print(tfm.GetInverse().TransformPoint((508, 10, 0)))
-    # print(tfm.GetInverse().TransformPoint((520, 515, 0)))
-    # print(tfm.GetInverse().TransformPoint((260, 260, 0)))
-    # print(tfm.GetInverse().TransformPoint((276, 106, 0)))
+    print(tfm.GetInverse().TransformPoint((0, 0, 0)))
+    print(tfm.GetInverse().TransformPoint((525, 0, 0)))
+    print(tfm.GetInverse().TransformPoint((525, 525, 0)))
+    print(tfm.GetInverse().TransformPoint((0, 525, 0)))
+    print(tfm.GetInverse().TransformPoint((341, 224, 0)))
+    pts = pts[:2, :]
 
-    # print('M\n', M)
-    # print('O\n', O)
-    # print('C\n', C)
-    # print('T\n', T)
-    # print('A\n', A)
+    # subtract y axis from 525 to get correct y axis
+    pts[1, :] = 525 - pts[1, :]
+    pts = np.vstack((pts, np.zeros((1, pts.shape[1]))))
+    print('pts shape', pts.shape)
+    pts_tfmed = []
+    for i in range(pts.shape[1]):
+        pts_tfmed.append(tfm.GetInverse().TransformPoint(pts[:, i].T))
+    pts_tfmed = np.array(pts_tfmed).T
 
-    # invert A
-    A_inv = np.linalg.inv(A)
 
-    pts_tfmed = np.matmul(A_inv, pts)
+    # # print('M\n', M)
+    # # print('O\n', O)
+    # # print('C\n', C)
+    # # print('T\n', T)
+    # # print('A\n', A)
+
+    # # print A
+    # # print('A\n', A)
+    # # invert A
+    # A_inv = np.linalg.inv(A)
+    # A_inv = np.array([[-2.09403934e-01, -8.25087080e-01,  5.27251472e+02],
+    #                  [ 8.25087080e-01, -2.09403934e-01,  8.05165971e+02],
+    #                  [ 0.00000000e+00,  0.00000000e+00,  1.00000000e+00]])
+    # # A_inv = np.array([[-2.09403934e-01, -8.25087080e-01, 0],
+    # #                  [ 8.25087080e-01, -2.09403934e-01, 0],
+    # #                  [ 0.00000000e+00,  0.00000000e+00,  1.00000000e+00]])
+
+    # # print('A_inv\n', A_inv)
+
+    # pts_tfmed = np.matmul(A_inv, pts)
     return A, pts_tfmed
 
 #  compute bbox of tfmed pts and plot cropped nissl image
@@ -71,6 +93,8 @@ def gen_and_save_cropped_nissl_img(nissl_path, op_path, bbox):
     img = Image.open(nissl_path)
     area = (bbox[0,0], bbox[1,0], bbox[0,1], bbox[1,1])
     cropped_img = img.crop(area).convert('RGB')
+    # cropped_img = cropped_img.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+    # cropped_img = cropped_img.transpose(PIL.Image.FLIP_TOP_BOTTOM)
     px = cropped_img.load()
     # px[0,0] = (0,0,0)
     # px[-1,1] = (255, 255, 255)
@@ -99,8 +123,14 @@ def gen_and_save_tfmed_stag_img(pts_tfmed, op_path, bbox):
     # plt.margins(0)
     # plt.axis('off')
     plt.scatter(pts_tfmed[0,:], pts_tfmed[1,:], s=5, c='#000000')
-    plt.xlim(bbox[0,0], bbox[0,1])
+    # plt.scatter([526, 419, 849, 961], [807, 378, 263, 696], s=500, c=['red', 'green', 'blue', 'yellow'])
     plt.ylim(bbox[1,0], bbox[1,1])
+    plt.xlim(bbox[0,0], bbox[0,1])
+    ax = plt.gca()
+    ax.set_ylim(ax.get_ylim()[::-1])
+    # ax.set_xlim(ax.get_xlim()[::-1])
+    print('ax.get_ylim()\n', ax.get_ylim())
+    print('ax.get_xlim()\n', ax.get_xlim())
 
     plt.savefig(op_path, bbox_inches='tight', pad_inches=0, transparent=False, dpi='figure', format='tiff')
     im = Image.open(op_path)
@@ -132,17 +162,39 @@ for f in filenames:
     if f == 'bead_coords.csv':
         test_pts = np.genfromtxt(f'{data_dir}/{f}', delimiter=',', names=None, dtype=np.float64).T
         test_pts = test_pts[:2]
+
+        # print test pts shape
+        print('test_pts shape\n', test_pts.shape)
+        # negate test points along y axis and y axis by subtracting from max value
+        # test_pts[0,:] = np.max(test_pts[0,:]) - test_pts[0,:]
+        # test_pts[1,:] = np.max(test_pts[1,:]) - test_pts[1,:]
+
+        # swap x and y axes
+        # test_pts = np.vstack((test_pts[1,:], test_pts[0,:]))
+        
         # homogenize points
         test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
+        
 
+        print('test_pts homo shape\n', test_pts.shape)
+        
+        bbbox_init = get_bbox(test_pts)
+        print('bbbox_init', bbbox_init)
 
         # transform points and write to file
         A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts)
 
+        # print pts tfmed shape
+        print('pts tfmed shape', np.shape(pts_tfmed[0,:]))
+
+        print('min', np.min(pts_tfmed))
+        print('max', np.argmax(pts_tfmed[0:]), np.max(pts_tfmed[0:]))
+        print('max', np.argmax(pts_tfmed[1:]), np.max(pts_tfmed[1:]))
+
         bbox = get_bbox(pts_tfmed)
         print('bbbox\n', bbox)
 
-        # save bbox as .csv
+        # save bbox as bbox.txt
         np.savetxt(snakemake.output.bbox, bbox, delimiter=",")
 
         # os.system('touch ' + op_file)
@@ -156,6 +208,11 @@ for f in filenames:
         # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
         # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
         # pts_tfmed[1,:] = pts_tfmed[1,:] - bbox[1,0]
+
+        # subtract y axis from 512  
+        # pts_tfmed[1,:] = 512 - pts_tfmed[1,:]
+
+        # pts_tfmed = -pts_tfmed
 
         # save tfmed points as .csv
         op_file_tfmed_pts = os.path.join(op_dir, f)
@@ -184,6 +241,14 @@ for f in filenames:
     # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
     # pts_tfmed[1,:] = pts_tfmed[1,:] - bbox[1,0]
 
+    # pts_tfmed = pts_tfmed[:2].T
+    # # flip x and y axis by subtracting from max
+    # pts_tfmed[0,:] = bbox[0,1] - pts_tfmed[0,:] + bbox[0,0]
+    # pts_tfmed[1,:] = bbox[1,1] - pts_tfmed[1,:] + bbox[1,0]
+
+    # # negate x and y axis
+    # pts_tfmed[0,:] = -pts_tfmed[0,:]
+    # pts_tfmed[1,:] = -pts_tfmed[1,:]
     # save tfmed points as .csv
     np.savetxt(op_file, pts_tfmed[:2].T, delimiter=",")
 
