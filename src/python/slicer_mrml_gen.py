@@ -44,7 +44,7 @@ def get_sub_text(stag_imgs):
         soup1.find('VectorVolumeDisplay')['id'] = soup1_id
         soup2.find('VolumeArchetypeStorage')['id'] = soup2_id
 
-        ref_str = f'references="display:{soup1_id};storage:{soup2_id};"'
+        ref_str = f'display:{soup1_id};storage:{soup2_id};'
         # set references in soup3
         soup3.find('VectorVolume')['references'] = ref_str
 
