@@ -2,3 +2,4 @@ st-pipeline.txt
 .snakemake
 build
 .DS_Store
+.pyc
