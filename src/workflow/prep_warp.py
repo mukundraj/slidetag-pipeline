@@ -20,7 +20,7 @@ import PIL
 # from produtils import dprint
 
 # reads ITK transform file and return extracted affine matrix
-# tfmed_yrange - if -1, indicates do operations on pts directly
+# tfmed_yrange - if -1, indicates do operations on pts directly (needed initialy to determine tfmed_yrange)
 #                if 0, indicates do operations after converting to slicer view space where [0,0] is at top left
 def tfm_pts(tfm_path, pts, tfmed_yrange):
 
