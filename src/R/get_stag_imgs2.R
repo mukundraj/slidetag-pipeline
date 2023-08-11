@@ -56,7 +56,7 @@ if (length(files_qs)==1){
     labs(x = NULL, y = NULL)&coord_fixed()
   impath <- file.path(opdir, paste0('bead_plot.png'))
   print(impath)
-  ggsave(impath, dpi=75)
+  ggsave(impath, dpi=25.4)
 
   # get img dims of image
   img_dims <- dim(read.bitmap(impath))
@@ -77,7 +77,7 @@ if (length(files_qs)==1){
     # save plot in output dir
     impath <- file.path(opdir, paste0('stag_', cell,'.png'))
     print(impath)
-  ggsave(impath, dpi=75)
+  ggsave(impath, dpi=25.4)
 
     # normalize coords using extents before writing and normalize
     sub_cellembs$s_1 <- (sub_cellembs$s_1 - xlims[1])/(xlims[2]-xlims[1]) * img_dims[1]

@@ -3,3 +3,5 @@ st-pipeline.txt
 build
 .DS_Store
 .pyc
+__pycache__
+

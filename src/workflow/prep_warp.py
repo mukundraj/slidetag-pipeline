@@ -55,11 +55,14 @@ def tfm_pts(tfm_path, pts, tfmed_yrange):
     # print(tfm.GetInverse().TransformPoint((341, 224, 0)))
     pts_tmp = pts[:2, :]
 
+    y_range = np.max(pts_tmp[1, :])
+
     # subtract y axis from 525 to get correct y axis
     if tfmed_yrange == -1:
         pts_tmp[1, :] =   pts_tmp[1, :]
     else:
-        pts_tmp[1, :] =  tfmed_yrange - pts_tmp[1, :]
+        # pts_tmp[1, :] =  tfmed_yrange - pts_tmp[1, :]
+        pts_tmp[1, :] =  y_range - pts_tmp[1, :]
 
     pts_tfmed = []
     pts_tmp = np.vstack((pts_tmp, np.zeros((1, pts_tmp.shape[1]))))
@@ -191,16 +194,19 @@ for f in filenames:
         # get bbox after tfm1
         A, tfmed_tst_pts = tfm_pts(snakemake.input.tfm1, test_pts, -1)
         tfmed_tst_pts_bbox = get_bbox(tfmed_tst_pts)
-        tfmed_yrange = tfmed_tst_pts_bbox[1,1] - tfmed_tst_pts_bbox[1,0]
-        print('tfmed_tst_pts bbox', tfmed_tst_pts_bbox)
-        print('tfmed_tst_pts bbox y range', tfmed_yrange)
+        # tfmed_yrange = tfmed_tst_pts_bbox[1,1] - tfmed_tst_pts_bbox[1,0]
+        # tfmed_xrange = tfmed_tst_pts_bbox[0,1] - tfmed_tst_pts_bbox[0,0]
+
+        # print('tfmed_tst_pts bbox', tfmed_tst_pts_bbox)
+        # print('tfmed_tst_pts bbox y range', tfmed_yrange)
+        # print('tfmed_tst_pts bbox x range', tfmed_xrange)
         # bbox_homo = np.array([[bbox]])
 
 
         # get tf1ed_bbox_dims
 
         # transform points and write to file
-        A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, tfmed_yrange)
+        A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, 0)
 
         # print pts tfmed shape
         print('pts tfmed shape', np.shape(pts_tfmed[0,:]))
@@ -221,6 +227,7 @@ for f in filenames:
         os.system('mkdir -p ' + snakemake.output.nis_imgs_dir)
         op_nis_name = snakemake.output.nis_imgs_dir+'/'+f.split('.')[0]+'_nissl.tif'
         print('op_nis_name\n', op_nis_name)
+        # gen_and_save_cropped_nissl_img(ip_nis_file, op_nis_name, bbox)
         gen_and_save_cropped_nissl_img(ip_nis_file, op_nis_name, bbox)
 
         # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
@@ -257,7 +264,7 @@ for f in filenames:
     test_pts = np.vstack((test_pts, np.ones((1, test_pts.shape[1]))))
 
     # transform points and write to file
-    A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, tfmed_yrange)
+    A, pts_tfmed = tfm_pts(snakemake.input.tfm1, test_pts, 0)
 
     # # subtract bbox[0,0] from all x coords and bbox[1,0] from all y coords
     # pts_tfmed[0,:] = pts_tfmed[0,:] - bbox[0,0]
