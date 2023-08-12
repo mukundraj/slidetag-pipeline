@@ -20,9 +20,9 @@ import PIL
 # from produtils import dprint
 
 # reads ITK transform file and return extracted affine matrix
-# tfmed_yrange - if -1, indicates do operations on pts directly (needed initialy to determine tfmed_yrange)
+# transform_ycoords - if -1, indicates do operations on pts directly (instead of after transforming to max(y) - y_i)
 #                if 0, indicates do operations after converting to slicer view space where [0,0] is at top left
-def tfm_pts(tfm_path, pts, tfmed_yrange):
+def tfm_pts(tfm_path, pts, transform_ycoords): # bool tfm_ycoords
 
     tfm = sitk.ReadTransform(tfm_path)
     # print(tfm)
@@ -58,10 +58,9 @@ def tfm_pts(tfm_path, pts, tfmed_yrange):
     y_range = np.max(pts_tmp[1, :])
 
     # subtract y axis from 525 to get correct y axis
-    if tfmed_yrange == -1:
+    if transform_ycoords == -1:
         pts_tmp[1, :] =   pts_tmp[1, :]
     else:
-        # pts_tmp[1, :] =  tfmed_yrange - pts_tmp[1, :]
         pts_tmp[1, :] =  y_range - pts_tmp[1, :]
 
     pts_tfmed = []
