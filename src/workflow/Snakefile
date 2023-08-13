@@ -24,16 +24,17 @@ rule test_r:
 	output:
 		opimg=config['homedir']+config['oproot']+'/tmp.png'
 	conda:
-		'../envs/'+config['r_envname']+'.yml'
+		config['codepath']+'/envs/'+config['r_envname']+'.yml'
+		# "snakemake"
 	script:
 		"../src/R/test.R"
 
 # unzip user uploaded zip file into dataname/raw folder
 rule unzip_data:
 	input:
-		inpzip=config['homedir']+config['datapath']+'/'+config['dataname']+'.zip'
+		inpzip=config['datapath']+'/'+config['dataname']+'.zip'
 	output:
-		outdir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/00_raw'),
+		outdir=directory(config['oproot']+'/'+config['dataname']+'/00_raw'),
 	shell:
 		"unzip {input.inpzip} -d {output.outdir}"
 
@@ -43,19 +44,20 @@ rule get_stag_imgs:
 	input:
 		raw_dir=rules.unzip_data.output.outdir
 	output:
-		stag_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/stags'),
-		stag_coords_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/stags_coords')
+		stag_imgs_dir=directory(config['datapath']+config['oproot']+'/'+config['dataname']+'/01_interim/stags'),
+		stag_coords_dir=directory(config['datapath']+config['oproot']+'/'+config['dataname']+'/01_interim/stags_coords')
 	conda:
-		'../envs/'+config['r_envname']+'.yml'
+		config['codepath']+'/envs/'+config['r_envname']+'.yml'
+		# "snakemake"
 	script:
-		"../src/R/get_stag_imgs2.R"
+		config['codepath']+"/src/R/get_stag_imgs2.R"
 
 # copies nissl img from raw folder to raw/nissls folder
 rule get_nissl_imgs:
 	input:
 		raw_dir=rules.unzip_data.output.outdir
 	output:
-		nissl_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/01_interim/nissls'),
+		nissl_imgs_dir=directory(config['datapath']+'/'+config['oproot']+'/'+config['dataname']+'/01_interim/nissls'),
 	shell:
 		"mkdir -p {output.nissl_imgs_dir} && cp {input.raw_dir}/"+config['dataname']+"/*.png {output.nissl_imgs_dir}"
 
@@ -66,18 +68,18 @@ rule format_imgs:
 		stag_imgs_dir=rules.get_stag_imgs.output.stag_imgs_dir,
 		nissl_imgs_dir=rules.get_nissl_imgs.output.nissl_imgs_dir
 	output:
-		fmted_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/02_formatted')
+		fmted_imgs_dir=directory(config['datapath']+'/'+config['oproot']+'/'+config['dataname']+'/02_formatted')
 	script:
-		"../src/workflow/format_imgs.py" # relative to Snakefile (Snakefile link in this case)
+		config['codepath']+"/src/workflow/format_imgs.py" # relative to Snakefile (Snakefile link in this case)
 
-fnames, = glob_wildcards(config['homedir']+config['oproot']+'/'+config['dataname']+'/raw/stags/{fname,[^/]+}.tif')
+fnames, = glob_wildcards(config['oproot']+'/'+config['dataname']+'/raw/stags/{fname,[^/]+}.tif')
 
 print (fnames)
-print(config['homedir']+config['oproot']+'/'+config['dataname']+'/nissls')
+print(config['oproot']+'/'+config['dataname']+'/nissls')
 
 rule all:
 	input:
-		olayplot=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',fname=fnames)
+		olayplot=expand(config['oproot']+'/'+config['dataname']+'/plots/{fname}/overlay_{fname}.png',fname=fnames)
 
 # rule prep_rigid_driver:
 # 	input:
@@ -88,18 +90,18 @@ rule all:
 
 rule prep_warp_driver:
 	input:
-		nissl=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
-		stag=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
-		mrml=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
-		from_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.fcsv', fname=fnames),
-		to_fids=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.fcsv', fname=fnames),
-		tfm1ed_pts=expand(config['homedir']+config['oproot']+'/'+config['dataname']+'/warps/{fname}/tfm1ed_pts.txt', fname=fnames),
+		nissl=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.tif', fname=fnames),
+		stag=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/stag_{fname}.tif', fname=fnames),
+		mrml=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/{fname}.mrml', fname=fnames),
+		from_fids=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/F.fcsv', fname=fnames),
+		to_fids=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/T.fcsv', fname=fnames),
+		tfm1ed_pts=expand(config['oproot']+'/'+config['dataname']+'/warps/{fname}/tfm1ed_pts.txt', fname=fnames),
 
 rule get_tifs:
 	input:
 		fmted_imgs_dir=rules.format_imgs.output.fmted_imgs_dir,
 	output:
-		rigid_imgs_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/03_rigid/tifs'),
+		rigid_imgs_dir=directory(config['oproot']+'/'+config['dataname']+'/03_rigid/tifs'),
 	shell:
 		"mkdir -p {output.rigid_imgs_dir}/nissls && mkdir -p {output.rigid_imgs_dir}/stags && cp {input.fmted_imgs_dir}/nissls/*.tif {output.rigid_imgs_dir}/nissls/ && cp {input.fmted_imgs_dir}/stags/*.tif {output.rigid_imgs_dir}/stags/"
 
@@ -107,21 +109,22 @@ rule get_tifs:
 rule prep_rigid:
 	input:
 		rigid_imgs_dir=rules.get_tifs.output.rigid_imgs_dir,
-		mrml_template='templates/rigid/rigid.mrml',
-		from_fids='templates/rigid/F.mrk.json',
-		to_fids='templates/rigid/T.mrk.json',
-		tfm1='templates/rigid/Tfm1.txt',
+		mrml_template=config['codepath']+'/templates/rigid/rigid.mrml',
+		from_fids=config['codepath']+'/templates/rigid/F.mrk.json',
+		to_fids=config['codepath']+'/templates/rigid/T.mrk.json',
+		tfm1=config['codepath']+'/templates/rigid/Tfm1.txt',
 	output:
-		mrml=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/{config["dataname"]}.mrml',
-		from_fids=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/F.mrk.json',
-		to_fids=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/T.mrk.json',
-		tfm1=config['homedir']+config['oproot']+'/'+config['dataname']+f'/03_rigid/Tfm1.txt',
+		mrml=config['datapath']+'/'+config['oproot']+'/'+config['dataname']+f'/03_rigid/{config["dataname"]}.mrml',
+		from_fids=config['datapath']+'/'+config['oproot']+'/'+config['dataname']+f'/03_rigid/F.mrk.json',
+		to_fids=config['datapath']+'/'+config['oproot']+'/'+config['dataname']+f'/03_rigid/T.mrk.json',
+		tfm1=config['datapath']+'/'+config['oproot']+'/'+config['dataname']+f'/03_rigid/Tfm1.txt',
 
 	conda:
-		'../envs/'+config['envname']+'.yml'
+		config['codepath']+'/envs/'+config['envname']+'.yml'
+		# "snakemake"
 
 	script:
-		"../src/workflow/prep_rigid.py"
+		config['codepath']+"/src/workflow/prep_rigid.py"
 
 
 # rule to get crop of nissl subregion and copy to warps folder

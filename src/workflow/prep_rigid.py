@@ -27,7 +27,8 @@ sub_text = get_sub_text(stag_imgs)
 
 
 # generate mrml from template
-with open("./templates/rigid/rigid.mrml", "rt") as fin:
+# with open("./templates/rigid/rigid.mrml", "rt") as fin:
+with open(snakemake.input.mrml_template) as fin:
     with open(f'{snakemake.output.mrml}', "wt") as fout:
         for line in fin:
             # line = line.replace('fname_nis', f'{snakemake.wildcards.fname}')

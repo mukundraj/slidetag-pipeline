@@ -1,7 +1,8 @@
 ---
 homedir: '/Users/username'
-datapath: '/Desktop/test'
+datapath: 'placeholder'
 dataname: 'placeholder'
-oproot: '/Desktop/test/data'
-envname: 'stags'
-r_envname: 'r_env'
+oproot: 'output'
+envname: 'stags2'
+codepath: 'placeholder'
+r_envname: 'stags2'
