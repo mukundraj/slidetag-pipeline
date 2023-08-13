@@ -162,10 +162,10 @@ rule render_plots:
 		bbox_file=rules.prep_warp.output.bbox,
 		# data=rules.prep_warp.input.data, # initially added for color info
 	output:
-		olay_plots_dir=directory(config['homedir']+config['oproot']+'/'+config['dataname']+'/05_plots'),
+		olay_plots_dir=directory(config['datapath']+'/'+config['oproot']+'/'+config['dataname']+'/05_plots'),
 
 	conda:
-		'../envs/'+config['envname']+'.yml'
+		config['codepath']+'/envs/'+config['envname']+'.yml'
 	script:
-		"../src/workflow/render_plots.py"
+		config['codepath']+'/src/workflow/render_plots.py'
 
