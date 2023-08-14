@@ -123,6 +123,7 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     # read bbox from bbox_file
     bbox_file = snakemake.input.bbox_file
     bbox = np.loadtxt(bbox_file, delimiter=',').T
+    print('bbox', bbox)
     bbox_dims = bbox[1] - bbox[0]
     print('bbox_dims', bbox_dims)
 
@@ -132,6 +133,8 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     # print(pos_warped_coords)
     # pos_warped_coords = -1 * pos_warped_coords
 
+    # create pos_warped_coords_global as pos_warped_coords + bbox[0]
+    pos_warped_coords_global = pos_warped_coords + bbox[0]
 
     # invert y axis by subtracting from max y
     # pos_warped_coords[:,1] = bbox_dims[1] - pos_warped_coords[:,1]
@@ -139,7 +142,11 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     # invert x axis by subtracting from max x
     # pos_warped_coords[:,0] = bbox_dims[0] - pos_warped_coords[:,0]
     # print(pos_warped_coords)
-    np.savetxt(op_fpath+'.txt', pos_warped_coords, delimiter=',')
+
+    # remove 'png' from op_fpath string
+    op_coords_fpath = op_fpath.replace('.png', '')
+    np.savetxt(op_coords_fpath+'_local.txt', pos_warped_coords, delimiter=',')
+    np.savetxt(op_coords_fpath+'_global.txt', pos_warped_coords_global, delimiter=',')
 
     my_dpi = 72
     fig = plt.figure(figsize=(bbox_dims[0]/my_dpi, bbox_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
@@ -147,7 +154,7 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     ax.set_axis_off()
     fig.add_axes(ax)
     print('pos_warped_coords', pos_warped_coords)
-    print('bbox', bbox)
+    print('bbox', bbox[0])
     print('bbox_dims', bbox_dims)
     # bbox_dims = [988.1-391.9, 834.2-235.8] # attn
     # plt.scatter(pos_warped_coords[:,0], pos_warped_coords[:,1], s=500, c=v1, cmap='Greens')
@@ -164,9 +171,38 @@ for tfm1ed_pts_file in tfm1ed_pts_files:
     plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
     plt.close()
 
+    op_fpath_local_png = op_fpath.replace('.png', '_local.png')
     nissl_file = f'{snakemake.input.nissl_dir}/bead_coords_nissl.tif'
-    cmd = f'convert {nissl_file} {tfmed_plot} -compose over -composite {op_fpath}'
+    cmd = f'convert {nissl_file} {tfmed_plot} -compose over -composite {op_fpath_local_png}'
     os.system(cmd)
+
+
+    # making global overlay plot
+    nissl_file_global = snakemake.input.nissl_global
+    img = plt.imread(nissl_file_global)
+    global_dims = img.shape
+
+    fig = plt.figure(figsize=(global_dims[0]/my_dpi, global_dims[1]/my_dpi), dpi=my_dpi, frameon=False)
+    ax = plt.Axes(fig, [0., 0., 1, 1])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+    plt.scatter(pos_warped_coords_global[:,0], pos_warped_coords_global[:,1], s=50, c='red')
+    plt.xlim(0, global_dims[0])
+    plt.ylim(0, global_dims[1])
+    ax = plt.gca()
+    ax.set_ylim(ax.get_ylim()[::-1])
+
+    tfmed_plot = f'{snakemake.output.olay_plots_dir}/tmp_tfmed_plot.png'
+    plt.savefig(f'{tfmed_plot}', bbox_inches='tight', pad_inches=0, transparent=True, dpi='figure', format='png')
+    plt.close()
+
+    op_fpath = op_fpath.replace('.png', '_global.png')
+    # nissl_file_global = snakemake.input.nissl
+    cmd = f'convert {nissl_file_global} {tfmed_plot} -compose over -composite {op_fpath}'
+    os.system(cmd)
+
+    # remove tmp_tfmed_plot.png
+    os.system(f'rm {tfmed_plot}')
 
 exit(0)
 

@@ -160,6 +160,7 @@ rule render_plots:
 		to_fids=rules.prep_warp.output.to_fids,
 		tfm1ed_pts_dir=rules.prep_warp.output.tfm1ed_pts_dir,
 		bbox_file=rules.prep_warp.output.bbox,
+		nissl_global=config['datapath']+'/'+config['oproot']+'/'+config['dataname']+f'/03_rigid/tifs/nissls/{config["dataname"]}_nissl.tif',
 		# data=rules.prep_warp.input.data, # initially added for color info
 	output:
 		olay_plots_dir=directory(config['datapath']+'/'+config['oproot']+'/'+config['dataname']+'/05_plots'),
