@@ -2,7 +2,8 @@
 homedir: '/home/username'
 datapath: ''
 dataname: 'placeholder'
-oproot: '/data'
+oproot: 'output'
 envname: 'stags-ubun'
+codepath: 'placeholder'
 r_envname: 'r_env_ubun'
 
